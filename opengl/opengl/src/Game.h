@@ -38,8 +38,10 @@ protected:
 	bool Is_Grounded_y = false;
 	bool Collides_y = false;
 
+	float refresh_rate;
+
 public:
-	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale);
+	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
 	struct Vertex_Array *load_level(std::string& level_path, float width, float height, float character_scale);
 	unsigned int *make_indecies(int size);

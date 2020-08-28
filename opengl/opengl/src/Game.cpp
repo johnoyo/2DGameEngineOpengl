@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale) : window(win)
+Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) : window(win), refresh_rate(refresh_rate)
 {
 	buffer = load_level(level_path, width, height, character_scale);
 	index_buffer = make_indecies(get_size());

@@ -17,7 +17,7 @@ int main(void)
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-#if 1
+#if 0
 	/* Create a windowed mode window and its OpenGL context */
 	GLFWwindow* window;
 	window = glfwCreateWindow(945, 540, "Hello World", NULL, NULL);
@@ -54,7 +54,7 @@ int main(void)
 	int size = 0;
 	std::string level = "res/levels/test1.txt";
 
-	Game_Instance game = Game_Instance(level, window, 945.0f, 540.0f, 27.0f);
+	Game_Instance game = Game_Instance(level, window, 945.0f, 540.0f, 27.0f, refresh_rate);
 
 	game.init();
 

@@ -10,7 +10,7 @@ class Game_Instance : public Game {
 
 public:
 	float amount_x = 0.0, amount_y = 0.0, amount_xx = 0.0, amount_yy = 0.0, scale_h = 0.0, scale_v = 0.0;
-	float refresh_rate = 60.0f;
+	//float refresh_rate = 60.0f;
 
 	double previous_time = glfwGetTime();
 	int frame_count = 0;
