@@ -17,6 +17,9 @@ public:
 	float current_time = 0.0, dt = 0.0;
 
 	void init() override {
+		std::cout << "Player index: " << p1.get_buffer_index()[0] << ", " << p1.get_buffer_index()[1] << ", " << p1.get_buffer_index()[2] << ", " << p1.get_buffer_index()[3] << "\n";
+		std::cout << "Enemy index: " << enemies_list.at(0).get_buffer_index()[0] << ", " << enemies_list.at(0).get_buffer_index()[1] << ", " << enemies_list.at(0).get_buffer_index()[2] << ", " << enemies_list.at(0).get_buffer_index()[3] << "\n";
+
 		//p1.set_texture_id(texture_slot[0] - 1);
 	}
 
@@ -43,5 +46,12 @@ public:
 		/* clamp y-axis speed*/
 		if (amount_y > 100.0) amount_y = 100.0;
 		if (amount_y < -100.0) amount_y = -100.0;
+
+		
+		if (check_if_obj_collides_with_obj(p1, enemies_list.at(0), buffer, get_size())) {
+			std::cout << "Collition Detected beetwen player and enemy\n";
+			enemies_list.at(0).change_position(new_position(27.0f, 0.0f));
+		}
+
 	}
 };

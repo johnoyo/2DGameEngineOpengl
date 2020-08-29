@@ -31,7 +31,7 @@ in vec4 v_color;
 in vec2 v_tex_coord;
 in float v_tex_id;
 
-uniform sampler2D u_textures[3];
+uniform sampler2D u_textures[5];
 
 void main()
 {

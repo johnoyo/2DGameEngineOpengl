@@ -23,6 +23,8 @@ private:
 	unsigned int shader;
 public:
 	struct Vertex_Array * buffer;
+	std::vector<Player> enemies_list;
+	std::vector<Player> collectible_list;
 private:
 	unsigned int buffer_size;
 	unsigned int * index_buffer;
@@ -30,7 +32,6 @@ private:
 protected:
 	unsigned int texture_slot[32];
 	Player p1;
-	std::vector<Player> enemies_list;
 
 	bool Is_Grounded_x = false;
 	bool Collides_x = false;
@@ -65,7 +66,7 @@ public:
 protected:
 	void update_buffer();
 	void handle_opengl();
-	//Vertex_Array * fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id);
+	Vertex_Array * fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id);
 
 	glm::vec2 new_position(float width, float height);
 	glm::vec4 new_color(float r, float g, float b, float a);

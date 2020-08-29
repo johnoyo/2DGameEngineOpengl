@@ -10,17 +10,20 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 	texture_slot[0] = LoadTexture("res/textures/Pixel-Art.png");
 	texture_slot[1] = LoadTexture("res/textures/BrickPreview.png");
 	texture_slot[2] = LoadTexture("res/textures/DT_LeaSeydoux.png");
+	texture_slot[3] = LoadTexture("res/textures/collectible-nobg.png");
+	texture_slot[4] = LoadTexture("res/textures/enemy.png");
 
 	std::cout << texture_slot[0] << ", " << texture_slot[1] << ", " << texture_slot[2] << "\n";
 
-	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position);
+	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale);
+	p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
 }
 
 Game::~Game()
 {
 }
 
-Vertex_Array * fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id) {
+Vertex_Array * Game::fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id) {
 	vertex[*index].position = new_position;
 	vertex[*index].color = new_color;
 	vertex[*index].tex_coord = new_tex_coord;
@@ -103,9 +106,27 @@ Vertex_Array * Game::load_level(std::string & level_path, float width, float hei
 			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(1.0f));
 
 		}
+		else if (p.at(k).k == 3.0f) {
+
+			collectible_list.push_back(Player(3, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
+			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(3.0f));
+			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(3.0f));
+			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(3.0f));
+			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(3.0f));
+
+		}
+		else if (p.at(k).k == 4.0f) {
+
+			enemies_list.push_back(Player(4, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
+			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(4.0f));
+			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(4.0f));
+			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(4.0f));
+			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(4.0f));
+
+		}
 	}
 
-	/* Player data (posotion, color, texture) gets added last to the vertex buffer */
+	/* Player data (position, color, texture) gets added last to the vertex buffer */
 
 	vertex = fill_buffer(vertex, &index, new_position(p.at(s).j * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), new_color(1.0f, 0.3f, 0.8f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
 	vertex = fill_buffer(vertex, &index, new_position((p.at(s).j + 1) * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), new_color(1.0f, 0.3f, 0.8f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
@@ -203,7 +224,10 @@ void Game::update_player_position(float amount_x, float amount_y)
 	buffer[get_size() - 2].position.y += amount_y;
 	buffer[get_size() - 1].position.x += amount_x;
 	buffer[get_size() - 1].position.y += amount_y;
+
 }
+
+
 
 void Game::render()
 {
@@ -219,6 +243,8 @@ void Game::render()
 	GLCall(glBindTextureUnit(0, texture_slot[0]));
 	GLCall(glBindTextureUnit(1, texture_slot[1]));
 	GLCall(glBindTextureUnit(2, texture_slot[2]));
+	GLCall(glBindTextureUnit(3, texture_slot[3]));
+	GLCall(glBindTextureUnit(4, texture_slot[4]));
 
 	GLCall(glDrawElements(GL_TRIANGLES, (get_size() / 4) * 6, GL_UNSIGNED_INT, NULL));
 }
@@ -230,6 +256,34 @@ void Game::update_buffer()
 	buffer[get_size() - 3].tex_id = p1.get_texture_id();
 	buffer[get_size() - 2].tex_id = p1.get_texture_id();
 	buffer[get_size() - 1].tex_id = p1.get_texture_id();
+
+	for (int i = 0; i < enemies_list.size(); i++) {
+		buffer[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
+		buffer[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + p1.get_scale();
+
+		buffer[enemies_list.at(i).get_buffer_index()[1]].position.x = enemies_list.at(i).get_position().x + p1.get_scale();
+		buffer[enemies_list.at(i).get_buffer_index()[1]].position.y = enemies_list.at(i).get_position().y + p1.get_scale();
+
+		buffer[enemies_list.at(i).get_buffer_index()[2]].position.x = enemies_list.at(i).get_position().x + p1.get_scale();
+		buffer[enemies_list.at(i).get_buffer_index()[2]].position.y = enemies_list.at(i).get_position().y;
+
+		buffer[enemies_list.at(i).get_buffer_index()[3]].position.x = enemies_list.at(i).get_position().x;
+		buffer[enemies_list.at(i).get_buffer_index()[3]].position.y = enemies_list.at(i).get_position().y;
+	}
+
+	for (int i = 0; i < collectible_list.size(); i++) {
+		buffer[collectible_list.at(i).get_buffer_index()[0]].position.x = collectible_list.at(i).get_position().x;
+		buffer[collectible_list.at(i).get_buffer_index()[0]].position.y = collectible_list.at(i).get_position().y + p1.get_scale();
+
+		buffer[collectible_list.at(i).get_buffer_index()[1]].position.x = collectible_list.at(i).get_position().x + p1.get_scale();
+		buffer[collectible_list.at(i).get_buffer_index()[1]].position.y = collectible_list.at(i).get_position().y + p1.get_scale();
+
+		buffer[collectible_list.at(i).get_buffer_index()[2]].position.x = collectible_list.at(i).get_position().x + p1.get_scale();
+		buffer[collectible_list.at(i).get_buffer_index()[2]].position.y = collectible_list.at(i).get_position().y;
+
+		buffer[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
+		buffer[collectible_list.at(i).get_buffer_index()[3]].position.y = collectible_list.at(i).get_position().y;
+	}
 
 }
 
@@ -275,8 +329,8 @@ void Game::handle_opengl()
 	GLCall(glUseProgram(shader));
 
 	GLCall(auto loc = glGetUniformLocation(shader, "u_textures"));
-	int samplers[3] = { 0, 1, 2 };
-	GLCall(glUniform1iv(loc, 3, samplers));
+	int samplers[5] = { 0, 1, 2, 3, 4 };
+	GLCall(glUniform1iv(loc, 5, samplers));
 
 	glm::vec3 translationA(0, 0, 0);
 
@@ -297,11 +351,13 @@ void Game::handle_collision(float scale_h, float scale_v, float amount_x, float 
 {
 	/* change the position of the player in the x-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(amount_x, 0.0f);
+
 	/* check if there is collision on x-axis */
 	buffer = check_for_collitions(buffer, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(0.0f, amount_y);
+
 	/* check if there is collision on y-axis */
 	buffer = check_for_collitions(buffer, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
 }

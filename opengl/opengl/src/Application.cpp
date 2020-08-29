@@ -17,11 +17,11 @@ int main(void)
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-#if 0
+#if 1
 	/* Create a windowed mode window and its OpenGL context */
 	GLFWwindow* window;
 	window = glfwCreateWindow(945, 540, "Hello World", NULL, NULL);
-	int refresh_rate = 60;
+	int refresh_rate = 144;
 #else
 	
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());

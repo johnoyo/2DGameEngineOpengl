@@ -109,3 +109,45 @@ struct Vertex_Array* check_for_collitions(struct Vertex_Array* vertex, int size,
 	return vertex;
 }
 
+bool check_corner_br_tl_bool(float p_x, float p_y, float l_x, float l_y, float l_x1, float l_y1) {
+	if (p_y <= l_y && p_x >= l_x && p_y >= l_y1 && p_x <= l_x1) return true;
+	return false;
+}
+
+bool check_corner_tr_bl_bool(float p_x, float p_y, float l_x, float l_y, float l_x1, float l_y1) {
+	if (p_y >= l_y && p_x >= l_x && p_y <= l_y1 && p_x <= l_x1) {
+		std::cout << "--top right--\n";
+		return true;
+	}
+	return false;
+}
+
+bool check_corner_tl_br_bool(float p_x, float p_y, float l_x, float l_y, float l_x1, float l_y1) {
+	if (p_y >= l_y && p_x <= l_x && p_y <= l_y1 && p_x >= l_x1) return true;
+	return false;
+}
+
+bool check_corner_bl_tr_bool(float p_x, float p_y, float l_x, float l_y, float l_x1, float l_y1) {
+	if (p_y <= l_y && p_x <= l_x && p_y >= l_y1 && p_x >= l_x1) return true;
+	return false;
+}
+
+bool check_if_obj_collides_with_obj(Player obj1, Player obj2, Vertex_Array* vertex, int size)
+{
+	bool tmp = false;
+
+	tmp = check_corner_br_tl_bool(vertex[obj1.get_buffer_index()[2]].position.x, vertex[obj1.get_buffer_index()[2]].position.y, vertex[obj2.get_buffer_index()[0]].position.x, vertex[obj2.get_buffer_index()[0]].position.y, vertex[obj2.get_buffer_index()[2]].position.x, vertex[obj2.get_buffer_index()[2]].position.y);
+	if (tmp) return true;
+
+	tmp = check_corner_tr_bl_bool(vertex[obj1.get_buffer_index()[1]].position.x, vertex[obj1.get_buffer_index()[1]].position.y, vertex[obj2.get_buffer_index()[3]].position.x, vertex[obj2.get_buffer_index()[3]].position.y, vertex[obj2.get_buffer_index()[1]].position.x, vertex[obj2.get_buffer_index()[1]].position.y);
+	if (tmp) return true;
+
+	tmp = check_corner_tl_br_bool(vertex[obj1.get_buffer_index()[0]].position.x, vertex[obj1.get_buffer_index()[0]].position.y, vertex[obj2.get_buffer_index()[2]].position.x, vertex[obj2.get_buffer_index()[2]].position.y, vertex[obj2.get_buffer_index()[0]].position.x, vertex[obj2.get_buffer_index()[0]].position.y);
+	if (tmp) return true;
+
+	tmp = check_corner_bl_tr_bool(vertex[obj1.get_buffer_index()[3]].position.x, vertex[obj1.get_buffer_index()[3]].position.y, vertex[obj2.get_buffer_index()[1]].position.x, vertex[obj2.get_buffer_index()[1]].position.y, vertex[obj2.get_buffer_index()[3]].position.x, vertex[obj2.get_buffer_index()[3]].position.y);
+	if (tmp) return true;
+
+	return false;
+}
+
