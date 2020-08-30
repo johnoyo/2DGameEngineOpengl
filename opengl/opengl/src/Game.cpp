@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) : window(win), refresh_rate(refresh_rate)
+Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) : window(win), refresh_rate(refresh_rate), tile_size(character_scale)
 {
 	buffer = load_level(level_path, width, height, character_scale);
 	index_buffer = make_indecies(get_size());
@@ -15,8 +15,9 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 
 	std::cout << texture_slot[0] << ", " << texture_slot[1] << ", " << texture_slot[2] << "\n";
 
-	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale);
+	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
 	p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
+	std::cout << p1.get_position().x << ", " << p1.get_position().y << "\n";
 }
 
 Game::~Game()
@@ -228,6 +229,27 @@ void Game::update_player_position(float amount_x, float amount_y)
 }
 
 
+void Game::update_player_position_x()
+{
+
+	buffer[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
+	buffer[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
+	buffer[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+	buffer[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
+
+}
+
+void Game::update_player_position_y()
+{
+
+	buffer[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
+	buffer[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+	buffer[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
+	buffer[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
+
+}
+
+
 
 void Game::render()
 {
@@ -251,6 +273,22 @@ void Game::render()
 
 void Game::update_buffer()
 {
+	if (p1.get_teleport())
+	{
+		buffer[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
+		buffer[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
+			   										  
+		buffer[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
+		buffer[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+			   										  
+		buffer[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+		buffer[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
+			   										  
+		buffer[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
+		buffer[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
+
+		p1.set_teleport(false);
+	}
 	
 	buffer[get_size() - 4].tex_id = p1.get_texture_id();
 	buffer[get_size() - 3].tex_id = p1.get_texture_id();
@@ -259,12 +297,12 @@ void Game::update_buffer()
 
 	for (int i = 0; i < enemies_list.size(); i++) {
 		buffer[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
-		buffer[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + p1.get_scale();
+		buffer[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + tile_size;
 
-		buffer[enemies_list.at(i).get_buffer_index()[1]].position.x = enemies_list.at(i).get_position().x + p1.get_scale();
-		buffer[enemies_list.at(i).get_buffer_index()[1]].position.y = enemies_list.at(i).get_position().y + p1.get_scale();
+		buffer[enemies_list.at(i).get_buffer_index()[1]].position.x = enemies_list.at(i).get_position().x + tile_size;
+		buffer[enemies_list.at(i).get_buffer_index()[1]].position.y = enemies_list.at(i).get_position().y + tile_size;
 
-		buffer[enemies_list.at(i).get_buffer_index()[2]].position.x = enemies_list.at(i).get_position().x + p1.get_scale();
+		buffer[enemies_list.at(i).get_buffer_index()[2]].position.x = enemies_list.at(i).get_position().x + tile_size;
 		buffer[enemies_list.at(i).get_buffer_index()[2]].position.y = enemies_list.at(i).get_position().y;
 
 		buffer[enemies_list.at(i).get_buffer_index()[3]].position.x = enemies_list.at(i).get_position().x;
@@ -273,12 +311,12 @@ void Game::update_buffer()
 
 	for (int i = 0; i < collectible_list.size(); i++) {
 		buffer[collectible_list.at(i).get_buffer_index()[0]].position.x = collectible_list.at(i).get_position().x;
-		buffer[collectible_list.at(i).get_buffer_index()[0]].position.y = collectible_list.at(i).get_position().y + p1.get_scale();
+		buffer[collectible_list.at(i).get_buffer_index()[0]].position.y = collectible_list.at(i).get_position().y + tile_size;
 
-		buffer[collectible_list.at(i).get_buffer_index()[1]].position.x = collectible_list.at(i).get_position().x + p1.get_scale();
-		buffer[collectible_list.at(i).get_buffer_index()[1]].position.y = collectible_list.at(i).get_position().y + p1.get_scale();
+		buffer[collectible_list.at(i).get_buffer_index()[1]].position.x = collectible_list.at(i).get_position().x + tile_size;
+		buffer[collectible_list.at(i).get_buffer_index()[1]].position.y = collectible_list.at(i).get_position().y + tile_size;
 
-		buffer[collectible_list.at(i).get_buffer_index()[2]].position.x = collectible_list.at(i).get_position().x + p1.get_scale();
+		buffer[collectible_list.at(i).get_buffer_index()[2]].position.x = collectible_list.at(i).get_position().x + tile_size;
 		buffer[collectible_list.at(i).get_buffer_index()[2]].position.y = collectible_list.at(i).get_position().y;
 
 		buffer[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
@@ -351,12 +389,14 @@ void Game::handle_collision(float scale_h, float scale_v, float amount_x, float 
 {
 	/* change the position of the player in the x-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(amount_x, 0.0f);
+	//update_player_position_x();
 
 	/* check if there is collision on x-axis */
 	buffer = check_for_collitions(buffer, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(0.0f, amount_y);
+	//update_player_position_y();
 
 	/* check if there is collision on y-axis */
 	buffer = check_for_collitions(buffer, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);

@@ -25,6 +25,7 @@ public:
 	struct Vertex_Array * buffer;
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
+	float tile_size;
 private:
 	unsigned int buffer_size;
 	unsigned int * index_buffer;
@@ -60,6 +61,8 @@ public:
 	virtual void init();
 	virtual void update();
 	void update_player_position(float amount_x, float amount_y);
+	void update_player_position_x();
+	void update_player_position_y();
 	void render();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
 

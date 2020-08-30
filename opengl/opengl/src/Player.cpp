@@ -36,6 +36,7 @@ void Player::fix_position(glm::vec2 new_pos)
 {
 	position.x = new_pos.x;
 	position.y = new_pos.y;
+	teleport = true;
 }
 
 glm::vec2 Player::get_position()
@@ -75,4 +76,14 @@ void Player::set_buffer_index(unsigned int indx0, unsigned int indx1, unsigned i
 unsigned int * Player::get_buffer_index()
 {
 	return buffer_index;
+}
+
+void Player::set_teleport(bool tel)
+{
+	teleport = tel;
+}
+
+bool Player::get_teleport()
+{
+	return teleport;
 }

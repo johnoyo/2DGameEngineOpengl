@@ -35,22 +35,27 @@ public:
 
 		/* Check for input on x-axis */
 		handle_input_hor(get_window(), &p1, 26.0f, &amount_x, get_size(), &scale_h, Is_Grounded_y, refresh_rate);
+		//p1.change_position(glm::vec2(amount_x, 0.0f));
 
 		/* Check for input on y-axis */
 		handle_input_vert(get_window(), &p1, 26.0f, &amount_y, get_size(), &scale_v, Is_Grounded_y, Collides_y, refresh_rate);
-	
+		//p1.change_position(glm::vec2(0.0f, amount_y));
+
+		//std::cout << p1.get_position().x << ", " << p1.get_position().y << "\n";
+
 		/* TODO: find out why "scale_v" it doesnt work by reference */
-		if (amount_y > 0) scale_v = -26.0;
-		else scale_v = 26.0;
+		if (amount_y > 0) scale_v = -26.0f;
+		else scale_v = 26.0f;
 
 		/* clamp y-axis speed*/
-		if (amount_y > 100.0) amount_y = 100.0;
-		if (amount_y < -100.0) amount_y = -100.0;
+		if (amount_y > 100.0f) amount_y = 100.0f;
+		if (amount_y < -100.0f) amount_y = -100.0f;
 
 		
 		if (check_if_obj_collides_with_obj(p1, enemies_list.at(0), buffer, get_size())) {
 			std::cout << "Collition Detected beetwen player and enemy\n";
 			enemies_list.at(0).change_position(new_position(27.0f, 0.0f));
+			p1.fix_position(new_position(270.0f, 270.0f));
 		}
 
 	}

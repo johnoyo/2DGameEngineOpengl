@@ -9,6 +9,7 @@ private:
 	float scale;
 	unsigned int texture_id;
 	unsigned int buffer_index[4];
+	bool teleport = false;
 public:
 	Player();
 	Player(unsigned int texture_id, glm::vec2 pos, float scale);
@@ -26,5 +27,8 @@ public:
 
 	void set_buffer_index(unsigned int indx0, unsigned int indx1, unsigned int indx2, unsigned int indx3);
 	unsigned int *get_buffer_index();
+
+	void set_teleport(bool tel);
+	bool get_teleport();
 
 };
