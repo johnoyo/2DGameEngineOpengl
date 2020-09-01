@@ -24,6 +24,7 @@ public:
 	}
 
 	void update() override {
+		
 		/* display fps every sec */
 		displayFPS(&frame_count, &previous_time);
 
@@ -56,6 +57,13 @@ public:
 			std::cout << "Collition Detected beetwen player and enemy\n";
 			enemies_list.at(0).change_position(new_position(27.0f, 0.0f));
 			p1.fix_position(new_position(270.0f, 270.0f));
+		}
+
+		if (check_if_obj_collides_with_obj(p1, collectible_list.at(0), buffer, get_size())) {
+			std::cout << "Changing level\n";
+			collectible_list.at(0).despawn();
+			//std::string level2 = "res/levels/test2.txt";
+			//Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
 		}
 
 	}

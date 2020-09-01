@@ -86,22 +86,22 @@ struct Vertex_Array* check_corner_bl_tr(struct Vertex_Array* vertex, int size, f
 }
 
 
-struct Vertex_Array* check_for_collitions(struct Vertex_Array* vertex, int size, float player_scale, bool* is_grounded, bool* collides, int axis) {
+struct Vertex_Array* check_for_collitions(struct Vertex_Array* vertex, Player p, int size, float player_scale, bool* is_grounded, bool* collides, int axis) {
 	struct Vertex_Array* tmp;
 	*is_grounded = false;
 	*collides = true;
 	for (int i = 4; i < size - 4; i += 4) {
 
-		tmp = check_corner_br_tl(vertex, size, player_scale, vertex[size - 2].position.x, vertex[size - 2].position.y, vertex[i + 0].position.x, vertex[i + 0].position.y, vertex[i + 2].position.x, vertex[i + 2].position.y, axis);
+		tmp = check_corner_br_tl(vertex, size, player_scale, vertex[p.get_buffer_index()[2]].position.x, vertex[p.get_buffer_index()[2]].position.y, vertex[i + 0].position.x, vertex[i + 0].position.y, vertex[i + 2].position.x, vertex[i + 2].position.y, axis);
 		if (tmp != NULL) { *is_grounded = true; return tmp; }
 
-		tmp = check_corner_tr_bl(vertex, size, player_scale, vertex[size - 3].position.x, vertex[size - 3].position.y, vertex[i + 3].position.x, vertex[i + 3].position.y, vertex[i + 1].position.x, vertex[i + 1].position.y, axis);
+		tmp = check_corner_tr_bl(vertex, size, player_scale, vertex[p.get_buffer_index()[1]].position.x, vertex[p.get_buffer_index()[1]].position.y, vertex[i + 3].position.x, vertex[i + 3].position.y, vertex[i + 1].position.x, vertex[i + 1].position.y, axis);
 		if (tmp != NULL) return tmp;
 
-		tmp = check_corner_tl_br(vertex, size, player_scale, vertex[size - 4].position.x, vertex[size - 4].position.y, vertex[i + 2].position.x, vertex[i + 2].position.y, vertex[i + 0].position.x, vertex[i + 0].position.y, axis);
+		tmp = check_corner_tl_br(vertex, size, player_scale, vertex[p.get_buffer_index()[0]].position.x, vertex[p.get_buffer_index()[0]].position.y, vertex[i + 2].position.x, vertex[i + 2].position.y, vertex[i + 0].position.x, vertex[i + 0].position.y, axis);
 		if (tmp != NULL) return tmp;
 
-		tmp = check_corner_bl_tr(vertex, size, player_scale, vertex[size - 1].position.x, vertex[size - 1].position.y, vertex[i + 1].position.x, vertex[i + 1].position.y, vertex[i + 3].position.x, vertex[i + 3].position.y, axis);
+		tmp = check_corner_bl_tr(vertex, size, player_scale, vertex[p.get_buffer_index()[3]].position.x, vertex[p.get_buffer_index()[3]].position.y, vertex[i + 1].position.x, vertex[i + 1].position.y, vertex[i + 3].position.x, vertex[i + 3].position.y, axis);
 		if (tmp != NULL) { *is_grounded = true; return tmp; }
 	}
 	*is_grounded = false;

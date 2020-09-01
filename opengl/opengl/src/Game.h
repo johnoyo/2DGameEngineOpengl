@@ -28,6 +28,7 @@ public:
 	float tile_size;
 private:
 	unsigned int buffer_size;
+	unsigned int total_buffer_size;
 	unsigned int * index_buffer;
 
 protected:
@@ -45,8 +46,10 @@ protected:
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
-	struct Vertex_Array *load_level(std::string& level_path, float width, float height, float character_scale);
+	struct Vertex_Array *load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
 	unsigned int *make_indecies(int size);
+
+	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);
 
 	void set_window(GLFWwindow *win);
 	GLFWwindow *get_window();

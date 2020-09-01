@@ -31,4 +31,6 @@ public:
 	void set_teleport(bool tel);
 	bool get_teleport();
 
+	void despawn();
+
 };
