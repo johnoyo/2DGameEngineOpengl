@@ -90,5 +90,5 @@ bool Player::get_teleport()
 
 void Player::despawn()
 {
-	fix_position(glm::vec2(0.0f, 0.0f));
+	fix_position(glm::vec2(-27.0f, -27.0f));
 }

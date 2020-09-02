@@ -25,6 +25,7 @@ public:
 	struct Vertex_Array * buffer;
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
+	Player Next_Level;
 	float tile_size;
 private:
 	unsigned int buffer_size;
@@ -42,11 +43,14 @@ protected:
 	bool Collides_y = false;
 
 	float refresh_rate;
+	int current_level;
 
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
 	struct Vertex_Array *load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
+	struct Vertex_Array* Load_Menu(float width, float height);
+	void Game_Over();
 	unsigned int *make_indecies(int size);
 
 	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);

@@ -3,43 +3,27 @@
 Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) : window(win), refresh_rate(refresh_rate), tile_size(character_scale)
 {
 
-	total_buffer_size = (width / character_scale * height / character_scale);
+	total_buffer_size = (width / character_scale * height / character_scale) * 4;
 	buffer = (struct Vertex_Array*)malloc(total_buffer_size * sizeof(struct Vertex_Array));
-	buffer = load_level(buffer, level_path, width, height, character_scale);
+	buffer = Load_Menu(width, height);
 	index_buffer = make_indecies(get_size());
 
-	handle_opengl();
+	//buffer = load_level(buffer, level_path, width, height, character_scale);
 
+	handle_opengl();
+	
 	texture_slot[0] = LoadTexture("res/textures/Pixel-Art.png");
 	texture_slot[1] = LoadTexture("res/textures/BrickPreview.png");
 	texture_slot[2] = LoadTexture("res/textures/DT_LeaSeydoux.png");
 	texture_slot[3] = LoadTexture("res/textures/collectible-nobg.png");
 	texture_slot[4] = LoadTexture("res/textures/enemy.png");
+	texture_slot[5] = LoadTexture("res/textures/health.png");
 
 	std::cout << texture_slot[0] << ", " << texture_slot[1] << ", " << texture_slot[2] << "\n";
 
-	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
-	p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
-	std::cout << p1.get_position().x << ", " << p1.get_position().y << "\n";
-}
-
-void Game::Load_Next_Level(std::string& level_path, float width, float height, float character_scale) {
-
-	collectible_list.clear();
-	enemies_list.clear();
-
-	buffer = load_level(buffer, level_path, width, height, character_scale);
-	index_buffer = make_indecies(get_size());
-
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
-
-	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
-	p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
-
-}
-
-Game::~Game()
-{
+	//p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
+	//p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
+	//std::cout << p1.get_position().x << ", " << p1.get_position().y << "\n";
 }
 
 Vertex_Array * Game::fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id) {
@@ -50,6 +34,53 @@ Vertex_Array * Game::fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new
 	*index = *index + 1;
 	return vertex;
 }
+
+Vertex_Array* Game::Load_Menu(float width, float height) {
+
+	int index = 4;
+
+	/* Background data(position, color, texture) gets added first to the vertex buffer */
+
+	buffer = fill_buffer(buffer, &index, new_position(0.0, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(2.0f));
+	buffer = fill_buffer(buffer, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(2.0f));
+	buffer = fill_buffer(buffer, &index, new_position(width, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(2.0f));
+	buffer = fill_buffer(buffer, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(2.0f));
+
+	set_size(index);
+
+	return buffer;
+
+}
+
+void Game::Game_Over() {
+	current_level = 0;
+	buffer = Load_Menu(945.0f, 540.0f);
+	index_buffer = make_indecies(get_size());
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+}
+
+void Game::Load_Next_Level(std::string& level_path, float width, float height, float character_scale) {
+
+	collectible_list.clear();
+	enemies_list.clear();
+
+	buffer = load_level(buffer, level_path, width, height, character_scale);
+	std::cout << "size: " << get_size() << ", total size: " << total_buffer_size << "\n";
+	index_buffer = make_indecies(get_size());
+
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+
+	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
+	p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
+
+	current_level++;
+
+}
+
+Game::~Game()
+{
+}
+
 
 Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, float width, float height, float character_scale)
 {
@@ -82,6 +113,10 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 		{
 			p.push_back({ i,j,4.0 });
 		}
+		else if (c == '>')
+		{
+			p.push_back({ i,j,5.0 });
+		}
 		else if (c == 'P')
 		{
 			p.push_back({ i,j,0.0 });
@@ -100,10 +135,15 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 	int index = 0;
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
-	vertex = fill_buffer(vertex, &index, new_position(0.0, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(2.0f));
-	vertex = fill_buffer(vertex, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(2.0f));
+	vertex = fill_buffer(vertex, &index, new_position(0.0, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(2.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(2.0f));
 	vertex = fill_buffer(vertex, &index, new_position(width, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(2.0f));
 	vertex = fill_buffer(vertex, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(2.0f));
+
+	vertex = fill_buffer(vertex, &index, new_position(0.0, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(5.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(5.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, height - 27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(5.0f));
+	vertex = fill_buffer(vertex, &index, new_position(0.0, height - 27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(5.0f));
 	
 	for (int k = 0; k < p.size(); k++) {
 		if (k == s) continue;
@@ -143,6 +183,15 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(4.0f));
 
 		}
+		else if (p.at(k).k == 5.0f) {
+
+			Next_Level = Player(5, index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale));
+			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(3.0f));
+			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(3.0f));
+			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(3.0f));
+			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(3.0f));
+
+		}
 	}
 
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
@@ -157,7 +206,7 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 	//}
 
 	fclose(f);
-	set_size((p.size() + 1) * 4);
+	set_size((p.size() + 1 + 1) * 4);
 	return vertex;
 }
 
@@ -269,26 +318,6 @@ void Game::update_player_position_y()
 
 
 
-void Game::render()
-{
-	update_buffer();
-
-	/* set dynamic vertex buffer */
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb));
-	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, get_size() * sizeof(Vertex_Array), buffer));
-
-	/* Render here */
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	GLCall(glBindTextureUnit(0, texture_slot[0]));
-	GLCall(glBindTextureUnit(1, texture_slot[1]));
-	GLCall(glBindTextureUnit(2, texture_slot[2]));
-	GLCall(glBindTextureUnit(3, texture_slot[3]));
-	GLCall(glBindTextureUnit(4, texture_slot[4]));
-
-	GLCall(glDrawElements(GL_TRIANGLES, (get_size() / 4) * 6, GL_UNSIGNED_INT, NULL));
-}
-
 void Game::update_buffer()
 {
 	if (p1.get_teleport())
@@ -312,6 +341,18 @@ void Game::update_buffer()
 	buffer[p1.get_buffer_index()[1]].tex_id = p1.get_texture_id();
 	buffer[p1.get_buffer_index()[2]].tex_id = p1.get_texture_id();
 	buffer[p1.get_buffer_index()[3]].tex_id = p1.get_texture_id();
+
+	buffer[Next_Level.get_buffer_index()[0]].position.x = Next_Level.get_position().x;
+	buffer[Next_Level.get_buffer_index()[0]].position.y = Next_Level.get_position().y + tile_size;
+
+	buffer[Next_Level.get_buffer_index()[1]].position.x = Next_Level.get_position().x + tile_size;
+	buffer[Next_Level.get_buffer_index()[1]].position.y = Next_Level.get_position().y + tile_size;
+		   									  
+	buffer[Next_Level.get_buffer_index()[2]].position.x = Next_Level.get_position().x + tile_size;
+	buffer[Next_Level.get_buffer_index()[2]].position.y = Next_Level.get_position().y;
+		   									  
+	buffer[Next_Level.get_buffer_index()[3]].position.x = Next_Level.get_position().x;
+	buffer[Next_Level.get_buffer_index()[3]].position.y = Next_Level.get_position().y;
 
 	for (int i = 0; i < enemies_list.size(); i++) {
 		buffer[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
@@ -342,6 +383,28 @@ void Game::update_buffer()
 	}
 
 }
+
+void Game::render()
+{
+	update_buffer();
+
+	/* set dynamic vertex buffer */
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb));
+	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, get_size() * sizeof(Vertex_Array), buffer));
+
+	/* Render here */
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	GLCall(glBindTextureUnit(0, texture_slot[0]));
+	GLCall(glBindTextureUnit(1, texture_slot[1]));
+	GLCall(glBindTextureUnit(2, texture_slot[2]));
+	GLCall(glBindTextureUnit(3, texture_slot[3]));
+	GLCall(glBindTextureUnit(4, texture_slot[4]));
+	GLCall(glBindTextureUnit(5, texture_slot[5]));
+
+	GLCall(glDrawElements(GL_TRIANGLES, (get_size() / 4) * 6, GL_UNSIGNED_INT, NULL));
+}
+
 
 void Game::handle_opengl()
 {
@@ -385,8 +448,8 @@ void Game::handle_opengl()
 	GLCall(glUseProgram(shader));
 
 	GLCall(auto loc = glGetUniformLocation(shader, "u_textures"));
-	int samplers[5] = { 0, 1, 2, 3, 4 };
-	GLCall(glUniform1iv(loc, 5, samplers));
+	int samplers[6] = { 0, 1, 2, 3, 4, 5 };
+	GLCall(glUniform1iv(loc, 6, samplers));
 
 	glm::vec3 translationA(0, 0, 0);
 
