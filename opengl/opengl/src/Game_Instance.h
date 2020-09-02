@@ -10,6 +10,7 @@ class Game_Instance : public Game {
 
 public:
 	float amount_x = 0.0, amount_y = 0.0, amount_xx = 0.0, amount_yy = 0.0, scale_h = 0.0, scale_v = 0.0;
+	float x = 0.0f;
 
 	double previous_time = glfwGetTime();
 	int frame_count = 0;
@@ -125,8 +126,19 @@ public:
 			}
 			else if (current_level == 2) {
 
+				std::cout << enemies_list.at(enemies_list.size() - 1).get_position().x << "\n";
+				
 
+				if (enemies_list.at(enemies_list.size()-1).get_position().x >= 837.0f)
+				{
+					x = -4.0f;
+				}
+				else if (enemies_list.at(enemies_list.size() - 1).get_position().x <= 27.0f)
+				{
+					x = 4.0f;
+				}
 
+				enemies_list.at(enemies_list.size() - 1).change_position(new_position(x, 0.0f));
 			}
 
 		}
