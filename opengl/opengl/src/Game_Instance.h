@@ -30,7 +30,7 @@ public:
 	void update() override {
 
 		/* display fps every sec */
-		displayFPS(&frame_count, &previous_time);
+		//displayFPS(&frame_count, &previous_time);
 
 		float new_time = glfwGetTime();
 		float frame_time = new_time - current_time;
@@ -126,8 +126,7 @@ public:
 			}
 			else if (current_level == 2) {
 
-				std::cout << enemies_list.at(enemies_list.size() - 1).get_position().x << "\n";
-				
+				//std::cout << enemies_list.at(enemies_list.size() - 1).get_position().x << "\n";
 
 				if (enemies_list.at(enemies_list.size()-1).get_position().x >= 837.0f)
 				{

@@ -16,7 +16,7 @@ int main(void)
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-#if 1
+#if 0
 	/* Create a windowed mode window and its OpenGL context */
 	GLFWwindow* window;
 	window = glfwCreateWindow(945, 540, "Hello World", NULL, NULL);
@@ -57,14 +57,39 @@ int main(void)
 
 	game.init();
 
+	static double limitFPS = 1.0 / 60.0;
+
+	double lastTime = glfwGetTime();
+	double timer = lastTime;
+	double deltaTime = 0, nowTime = 0;
+	int frames = 0, updates = 0;
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		game.update();
+		// - Measure time
+		nowTime = glfwGetTime();
+		deltaTime += (nowTime - lastTime) / limitFPS;
+		lastTime = nowTime;
 
-		game.handle_collision(game.scale_h, game.scale_v, game.amount_x, game.amount_y, 0);
+		// - Only update at 60 frames / s
+		while (deltaTime >= 1.0) {
+			game.update();   // - Update function
+			game.handle_collision(game.scale_h, game.scale_v, game.amount_x, game.amount_y, 0);
+			updates++;
+			deltaTime--;
+		}
 		
+		// - Render at maximum possible frames
 		game.render();
+		frames++;
+
+		// - Reset after one second
+		if (glfwGetTime() - timer > 1.0) {
+			timer++;
+			std::cout << "FPS: " << frames << " Updates:" << updates << std::endl;
+			updates = 0, frames = 0;
+		}
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
