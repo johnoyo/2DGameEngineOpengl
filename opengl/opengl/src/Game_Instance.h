@@ -10,7 +10,7 @@ class Game_Instance : public Game {
 
 public:
 	float amount_x = 0.0, amount_y = 0.0, amount_xx = 0.0, amount_yy = 0.0, scale_h = 0.0, scale_v = 0.0;
-	float x = 0.0f;
+	float x = 0.0f, y = 0.0f, y1 = 0.0f;
 
 	double previous_time = glfwGetTime();
 	int frame_count = 0;
@@ -20,11 +20,20 @@ public:
 	int frame_count1 = 0;
 	float current_time1 = 0.0;
 
+	double previous_time2 = glfwGetTime();
+	int frame_count2 = 0;
+	float current_time2 = 0.0;
+
+	bool despawn = true;
+
+	std::vector<glm::vec2> pos;
+
 	void init() override {
 		//std::cout << "Player index: " << p1.get_buffer_index()[0] << ", " << p1.get_buffer_index()[1] << ", " << p1.get_buffer_index()[2] << ", " << p1.get_buffer_index()[3] << "\n";
 		//std::cout << "Enemy index: " << enemies_list.at(0).get_buffer_index()[0] << ", " << enemies_list.at(0).get_buffer_index()[1] << ", " << enemies_list.at(0).get_buffer_index()[2] << ", " << enemies_list.at(0).get_buffer_index()[3] << "\n";
 
 		//p1.set_texture_id(texture_slot[0] - 1);
+		
 	}
 
 	void update() override {
@@ -41,6 +50,8 @@ public:
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (glfwGetKey(get_window(), GLFW_KEY_SPACE) == GLFW_PRESS) {
 				std::string level1 = "res/levels/test1.txt";
+				Player health_bar = Player(5, new_position(0.0, 540.0f), new_position(945.0f, 540.0f), new_position(945.0f, 513.0f), new_position(0.0, 513.0f));
+				custom_sprite_list.push_back(health_bar);
 				Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
 			}
 		}
@@ -51,12 +62,11 @@ public:
 			/* If a second has passed. */
 			if (current_time1 - previous_time1 >= 1.0)
 			{
-				/* Display the frame count here any way you want. */
-				if (buffer[5].position.x > 0.0f) {
+				// Display the frame count here any way you want.
+				if (buffer[custom_sprite_list.at(0).get_buffer_index()[1]].position.x > 0.0f) {
 
 					std::cout << "Health decreasing...\n";
-					buffer[5].position.x -= tile_size;
-					buffer[6].position.x -= tile_size;
+					Change_Sprite_Scale(custom_sprite_list.at(0), -tile_size);
 
 				}
 				else {
@@ -93,6 +103,7 @@ public:
 				if (check_if_obj_collides_with_obj(p1, enemies_list.at(i), buffer, get_size())) {
 					std::cout << "Collition Detected beetwen player and enemy\n";
 					p1.fix_position(new_position(81.0f, 27.0f));
+					Change_Sprite_Scale(custom_sprite_list.at(0), -tile_size/2);
 				}
 
 			}
@@ -101,11 +112,10 @@ public:
 
 				if (check_if_obj_collides_with_obj(p1, collectible_list.at(i), buffer, get_size())) {
 					collectible_list.at(i).despawn();
-					if (buffer[5].position.x <= 945.0f) {
+					if (buffer[custom_sprite_list.at(0).get_buffer_index()[1]].position.x <= 945.0f) {
 
 						std::cout << "Health increased...\n";
-						buffer[5].position.x += 3*tile_size;
-						buffer[6].position.x += 3*tile_size;
+						Change_Sprite_Scale(custom_sprite_list.at(0), 3*tile_size);
 
 					}
 				}
@@ -126,18 +136,93 @@ public:
 			}
 			else if (current_level == 2) {
 
+				
+
 				//std::cout << enemies_list.at(enemies_list.size() - 1).get_position().x << "\n";
 
 				if (enemies_list.at(enemies_list.size()-1).get_position().x >= 837.0f)
 				{
-					x = -4.0f;
+					x = -6.0f;
 				}
 				else if (enemies_list.at(enemies_list.size() - 1).get_position().x <= 27.0f)
 				{
-					x = 4.0f;
+					x = 6.0f;
 				}
 
 				enemies_list.at(enemies_list.size() - 1).change_position(new_position(x, 0.0f));
+
+				if (enemies_list.at(0).get_position().y >= 459.0f) y = -2.0f;
+				else if (enemies_list.at(0).get_position().y <= 351.0f) y = 2.0f;
+
+				for(int i = 0; i < 8; i++)
+				 enemies_list.at(i).change_position(new_position(0.0f, y));
+
+				if (enemies_list.at(8).get_position().y >= 459.0f) y1 = -2.0f;
+				else if (enemies_list.at(8).get_position().y <= 351.0f) y1 = 2.0f;
+
+				for (int i = 8; i < 16; i++)
+					enemies_list.at(i).change_position(new_position(0.0f, y1));
+
+				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer, get_size())) {
+
+					std::cout << "Changing level\n";
+					Next_Level.despawn();
+					std::string level3 = "res/levels/test3.txt";
+					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
+
+				}
+
+			}
+			else if (current_level == 3) {
+
+				if (enemies_list.at(enemies_list.size() - 11).get_position().x >= 864.0f)
+				{
+					x = -12.0f;
+				}
+				else if (enemies_list.at(enemies_list.size() - 11).get_position().x <= 27.0f)
+				{
+					x = 12.0f;
+				}
+
+				enemies_list.at(enemies_list.size() - 11).change_position(new_position(x, 0.0f));
+
+
+
+				double current_time2 = glfwGetTime();
+				frame_count2++;
+				/* If a second has passed. */
+				if (current_time2 - previous_time2 >= 0.7)
+				{
+					// Display the frame count here any way you want.
+					
+					if (despawn) {
+						std::cout << "Despawing...\n";
+						for (int i = 0; i < 15; i++) {
+							pos.push_back(enemies_list.at(i).get_position());
+							enemies_list.at(i).despawn();
+						}
+						despawn = false;
+
+					}
+					else {
+						std::cout << "Respawing...\n";
+						for (int i = 0; i < 15; i++) {
+							enemies_list.at(i).respawn(pos.at(i));
+						}
+						pos.clear();
+						despawn = true;
+					}
+
+					frame_count2 = 0;
+					previous_time2 = current_time2;
+				}
+
+				float new_time2 = glfwGetTime();
+				float frame_time2 = new_time2 - current_time2;
+				current_time2 = new_time2;
+
+				
+
 			}
 
 		}

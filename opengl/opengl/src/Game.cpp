@@ -53,6 +53,7 @@ Vertex_Array* Game::Load_Menu(float width, float height) {
 }
 
 void Game::Game_Over() {
+	custom_sprite_list.clear();
 	current_level = 0;
 	buffer = Load_Menu(945.0f, 540.0f);
 	index_buffer = make_indecies(get_size());
@@ -75,6 +76,26 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 
 	current_level++;
 
+}
+
+Vertex_Array* Game::Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id) {
+
+	int index = get_size();
+	int size = get_size();
+
+	buffer = fill_buffer(buffer, &index, tl, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(tex_id));
+	buffer = fill_buffer(buffer, &index, tr, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(tex_id));
+	buffer = fill_buffer(buffer, &index, br, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(tex_id));
+	buffer = fill_buffer(buffer, &index, bl, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(tex_id));
+
+	return buffer;
+
+}
+
+void Game::Change_Sprite_Scale(Player sp, float x)
+{
+	buffer[sp.get_buffer_index()[1]].position.x += x;
+	buffer[sp.get_buffer_index()[2]].position.x += x;
 }
 
 Game::~Game()
@@ -139,12 +160,12 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 	vertex = fill_buffer(vertex, &index, new_position(width, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(2.0f));
 	vertex = fill_buffer(vertex, &index, new_position(width, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(2.0f));
 	vertex = fill_buffer(vertex, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(2.0f));
-
+	/*
 	vertex = fill_buffer(vertex, &index, new_position(0.0, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(5.0f));
 	vertex = fill_buffer(vertex, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(5.0f));
 	vertex = fill_buffer(vertex, &index, new_position(width, height - 27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(5.0f));
 	vertex = fill_buffer(vertex, &index, new_position(0.0, height - 27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(5.0f));
-	
+	*/
 	for (int k = 0; k < p.size(); k++) {
 		if (k == s) continue;
 		/*std::cout << p.at(k).i << "," << p.at(k).j << "\n"; */
@@ -194,6 +215,17 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 		}
 	}
 
+	set_size(index);
+
+	for (int i = 0; i < custom_sprite_list.size(); i++) {
+		vertex = Make_Custom_Sprite(custom_sprite_list.at(i).get_custom_position_0(), custom_sprite_list.at(i).get_custom_position_1(),
+									custom_sprite_list.at(i).get_custom_position_2(), custom_sprite_list.at(i).get_custom_position_3(), custom_sprite_list.at(i).get_texture_id());
+
+		custom_sprite_list.at(i).set_buffer_index(index, index + 1, index + 2, index + 3);
+
+		index += 4;
+	}
+
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
 
 	vertex = fill_buffer(vertex, &index, new_position(p.at(s).j * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), new_color(1.0f, 0.3f, 0.8f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
@@ -201,12 +233,13 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 	vertex = fill_buffer(vertex, &index, new_position((p.at(s).j + 1) * character_scale - 1, p.at(s).i * character_scale - 1), new_color(1.0f, 0.3f, 0.8f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
 	vertex = fill_buffer(vertex, &index, new_position(p.at(s).j * character_scale - 1, p.at(s).i * character_scale - 1), new_color(1.0f, 0.3f, 0.8f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
 
+
 	//for (int k = 0; k < ((p.size() + 1)*4); k++) {
 	//	std::cout << vertex[k].position.x << ", " << vertex[k].position.y << "\n";
 	//}
 
 	fclose(f);
-	set_size((p.size() + 1 + 1) * 4);
+	set_size(index);
 	return vertex;
 }
 
@@ -381,7 +414,22 @@ void Game::update_buffer()
 		buffer[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
 		buffer[collectible_list.at(i).get_buffer_index()[3]].position.y = collectible_list.at(i).get_position().y;
 	}
+	
+	/*for (int i = 0; i < custom_sprite_list.size(); i++) {
+		
+		buffer[custom_sprite_list.at(i).get_buffer_index()[0]].position.x = custom_sprite_list.at(i).get_position().x;
+		buffer[custom_sprite_list.at(i).get_buffer_index()[0]].position.y = custom_sprite_list.at(i).get_position().y + tile_size;
 
+		buffer[custom_sprite_list.at(i).get_buffer_index()[1]].position.x = custom_sprite_list.at(i).get_position().x + tile_size;
+		buffer[custom_sprite_list.at(i).get_buffer_index()[1]].position.y = custom_sprite_list.at(i).get_position().y + tile_size;
+
+		buffer[custom_sprite_list.at(i).get_buffer_index()[2]].position.x = custom_sprite_list.at(i).get_position().x + tile_size;
+		buffer[custom_sprite_list.at(i).get_buffer_index()[2]].position.y = custom_sprite_list.at(i).get_position().y;
+
+		buffer[custom_sprite_list.at(i).get_buffer_index()[3]].position.x = custom_sprite_list.at(i).get_position().x;
+		buffer[custom_sprite_list.at(i).get_buffer_index()[3]].position.y = custom_sprite_list.at(i).get_position().y;
+	}*/
+	
 }
 
 void Game::render()

@@ -6,12 +6,7 @@
 #include "Collision_Detection.h"
 #include<vector>
 
-struct Vertex_Array {
-	glm::vec2 position;
-	glm::vec4 color;
-	glm::vec2 tex_coord;
-	float tex_id;
-};
+
 
 class Game {
 private:
@@ -25,6 +20,7 @@ public:
 	struct Vertex_Array * buffer;
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
+	std::vector<Player> custom_sprite_list;
 	Player Next_Level;
 	float tile_size;
 private:
@@ -52,6 +48,9 @@ public:
 	struct Vertex_Array* Load_Menu(float width, float height);
 	void Game_Over();
 	unsigned int *make_indecies(int size);
+	
+	Vertex_Array* Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id);
+	void Change_Sprite_Scale(Player sp, float x);
 
 	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);
 
