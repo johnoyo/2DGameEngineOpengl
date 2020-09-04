@@ -12,12 +12,14 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 
 	handle_opengl();
 	
-	texture_slot[0] = LoadTexture("res/textures/Pixel-Art.png");
-	texture_slot[1] = LoadTexture("res/textures/BrickPreview.png");
-	texture_slot[2] = LoadTexture("res/textures/DT_LeaSeydoux.png");
-	texture_slot[3] = LoadTexture("res/textures/collectible-nobg.png");
+	texture_slot[0] = LoadTexture("res/textures/robot.png");
+	texture_slot[1] = LoadTexture("res/textures/factory_tile.png");
+	texture_slot[2] = LoadTexture("res/textures/main_menu.png");
+	texture_slot[3] = LoadTexture("res/textures/collectible.png");
 	texture_slot[4] = LoadTexture("res/textures/enemy.png");
 	texture_slot[5] = LoadTexture("res/textures/health.png");
+	texture_slot[6] = LoadTexture("res/textures/factory_bg_6.png");
+	texture_slot[7] = LoadTexture("res/textures/robot_reversed.png");
 
 	std::cout << texture_slot[0] << ", " << texture_slot[1] << ", " << texture_slot[2] << "\n";
 
@@ -156,10 +158,10 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 	int index = 0;
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
-	vertex = fill_buffer(vertex, &index, new_position(0.0, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(2.0f));
-	vertex = fill_buffer(vertex, &index, new_position(width, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(2.0f));
-	vertex = fill_buffer(vertex, &index, new_position(width, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(2.0f));
-	vertex = fill_buffer(vertex, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(2.0f));
+	vertex = fill_buffer(vertex, &index, new_position(0.0, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(6.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(6.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(6.0f));
+	vertex = fill_buffer(vertex, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(6.0f));
 	/*
 	vertex = fill_buffer(vertex, &index, new_position(0.0, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(5.0f));
 	vertex = fill_buffer(vertex, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(5.0f));
@@ -449,6 +451,8 @@ void Game::render()
 	GLCall(glBindTextureUnit(3, texture_slot[3]));
 	GLCall(glBindTextureUnit(4, texture_slot[4]));
 	GLCall(glBindTextureUnit(5, texture_slot[5]));
+	GLCall(glBindTextureUnit(6, texture_slot[6]));
+	GLCall(glBindTextureUnit(7, texture_slot[7]));
 
 	GLCall(glDrawElements(GL_TRIANGLES, (get_size() / 4) * 6, GL_UNSIGNED_INT, NULL));
 }
@@ -496,8 +500,8 @@ void Game::handle_opengl()
 	GLCall(glUseProgram(shader));
 
 	GLCall(auto loc = glGetUniformLocation(shader, "u_textures"));
-	int samplers[6] = { 0, 1, 2, 3, 4, 5 };
-	GLCall(glUniform1iv(loc, 6, samplers));
+	int samplers[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+	GLCall(glUniform1iv(loc, 8, samplers));
 
 	glm::vec3 translationA(0, 0, 0);
 

@@ -32,7 +32,7 @@ public:
 		//std::cout << "Player index: " << p1.get_buffer_index()[0] << ", " << p1.get_buffer_index()[1] << ", " << p1.get_buffer_index()[2] << ", " << p1.get_buffer_index()[3] << "\n";
 		//std::cout << "Enemy index: " << enemies_list.at(0).get_buffer_index()[0] << ", " << enemies_list.at(0).get_buffer_index()[1] << ", " << enemies_list.at(0).get_buffer_index()[2] << ", " << enemies_list.at(0).get_buffer_index()[3] << "\n";
 
-		//p1.set_texture_id(texture_slot[0] - 1);
+		p1.set_texture_id(0);
 		
 	}
 
@@ -93,6 +93,9 @@ public:
 			/* TODO: find out why "scale_v" it doesnt work by reference */
 			if (amount_y > 0) scale_v = -26.0f;
 			else scale_v = 26.0f;
+
+			if (scale_h > 0) p1.set_texture_id(7);
+			else  p1.set_texture_id(0);
 
 			/* clamp y-axis speed*/
 			if (amount_y > 100.0f) amount_y = 100.0f;
@@ -177,11 +180,11 @@ public:
 
 				if (enemies_list.at(enemies_list.size() - 11).get_position().x >= 864.0f)
 				{
-					x = -12.0f;
+					x = -10.5f;
 				}
 				else if (enemies_list.at(enemies_list.size() - 11).get_position().x <= 27.0f)
 				{
-					x = 12.0f;
+					x = 10.5f;
 				}
 
 				enemies_list.at(enemies_list.size() - 11).change_position(new_position(x, 0.0f));
@@ -197,7 +200,7 @@ public:
 					
 					if (despawn) {
 						std::cout << "Despawing...\n";
-						for (int i = 0; i < 15; i++) {
+						for (int i = 49; i < 64; i++) {
 							pos.push_back(enemies_list.at(i).get_position());
 							enemies_list.at(i).despawn();
 						}
@@ -206,8 +209,10 @@ public:
 					}
 					else {
 						std::cout << "Respawing...\n";
-						for (int i = 0; i < 15; i++) {
-							enemies_list.at(i).respawn(pos.at(i));
+						int j = 0;
+						for (int i = 49; i < 64; i++) {
+							enemies_list.at(i).respawn(pos.at(j));
+							j++;
 						}
 						pos.clear();
 						despawn = true;
@@ -221,7 +226,16 @@ public:
 				float frame_time2 = new_time2 - current_time2;
 				current_time2 = new_time2;
 
-				
+				if (enemies_list.at(48).get_position().x >= 891.0f)
+				{
+					x = -10.0f;
+				}
+				else if (enemies_list.at(48).get_position().x <= 27.0f)
+				{
+					x = 10.0f;
+				}
+
+				enemies_list.at(48).change_position(new_position(x, 0.0f));
 
 			}
 
