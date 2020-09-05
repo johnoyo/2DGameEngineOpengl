@@ -7,6 +7,7 @@
 
 #define X_AXIS 1
 #define Y_AXIS 2
+#define PI 3.14159265f
 
 #define DEBUG
 

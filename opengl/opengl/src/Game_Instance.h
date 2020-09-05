@@ -12,6 +12,8 @@ public:
 	float amount_x = 0.0, amount_y = 0.0, amount_xx = 0.0, amount_yy = 0.0, scale_h = 0.0, scale_v = 0.0;
 	float x = 0.0f, y = 0.0f, y1 = 0.0f;
 
+	float xx = 0.0f, yy = 0.0f, angle = 0.0f, angle1 = 180.0f;;
+
 	double previous_time = glfwGetTime();
 	int frame_count = 0;
 	float current_time = 0.0, dt = 0.0;
@@ -71,7 +73,7 @@ public:
 				}
 				else {
 					std::cout << "Game Over!!!\n";
-					Game_Over();
+					Game_Over(2.0f);
 				}
 
 				frame_count1 = 0;
@@ -139,10 +141,6 @@ public:
 			}
 			else if (current_level == 2) {
 
-				
-
-				//std::cout << enemies_list.at(enemies_list.size() - 1).get_position().x << "\n";
-
 				if (enemies_list.at(enemies_list.size()-1).get_position().x >= 837.0f)
 				{
 					x = -6.0f;
@@ -178,6 +176,117 @@ public:
 			}
 			else if (current_level == 3) {
 
+				xx = 243.0f + std::cos(angle * PI / 180.0f) * 54.0f;
+				yy = 405.0f + std::sin(angle * PI / 180.0f) * 54.0f;
+
+				enemies_list.at(0).fix_position(new_position(xx, yy));
+
+				xx = 243.0f + std::cos(angle1 * PI / 180.0f) * 54.0f;
+				yy = 405.0f + std::sin(angle1 * PI / 180.0f) * 54.0f;
+
+				enemies_list.at(1).fix_position(new_position(xx, yy));
+
+				xx = 675.0f + std::cos(angle * PI / 180.0f) * 54.0f;
+				yy = 405.0f + std::sin(angle * PI / 180.0f) * 54.0f;
+
+				enemies_list.at(2).fix_position(new_position(xx, yy));
+
+				xx = 675.0f + std::cos(angle1 * PI / 180.0f) * 54.0f;
+				yy = 405.0f + std::sin(angle1 * PI / 180.0f) * 54.0f;
+
+				enemies_list.at(3).fix_position(new_position(xx, yy));
+
+				xx = 459.0f + std::cos(angle * PI / 180.0f) * 54.0f;
+				yy = 405.0f + std::sin(angle * PI / 180.0f) * 54.0f;
+
+				enemies_list.at(4).fix_position(new_position(xx, yy));
+
+				xx = 459.0f + std::cos(angle1 * PI / 180.0f) * 54.0f;
+				yy = 405.0f + std::sin(angle1 * PI / 180.0f) * 54.0f;
+
+				enemies_list.at(5).fix_position(new_position(xx, yy));
+
+				angle += 4;
+				if (angle > 360.0f) angle = 0.0f;
+				angle1 += 4;
+				if (angle1 > 360.0f) angle1 = 0.0f;
+
+				if (enemies_list.at(enemies_list.size() - 4).get_position().x >= 405.0f) 
+					x = -6.0f;
+				else if (enemies_list.at(enemies_list.size() - 4).get_position().x <= 162.0f) 
+					x = 6.0f;
+
+				enemies_list.at(enemies_list.size() - 4).change_position(new_position(x, 0.0f));
+
+				if (enemies_list.at(enemies_list.size() - 3).get_position().x >= 432.0f)
+					x = -6.0f;
+				else if (enemies_list.at(enemies_list.size() - 3).get_position().x <= 189.0f)
+					x = 6.0f;
+
+				enemies_list.at(enemies_list.size() - 3).change_position(new_position(x, 0.0f));
+
+
+				if (enemies_list.at(enemies_list.size() - 2).get_position().x >= 783.0f)
+					x = -6.0f;
+				else if (enemies_list.at(enemies_list.size() - 2).get_position().x <= 540.0f)
+					x = 6.0f;
+
+				enemies_list.at(enemies_list.size() - 2).change_position(new_position(x, 0.0f));
+
+				if (enemies_list.at(enemies_list.size() - 1).get_position().x >= 810.0f)
+					x = -6.0f;
+				else if (enemies_list.at(enemies_list.size() - 1).get_position().x <= 567.0f)
+					x = 6.0f;
+
+				enemies_list.at(enemies_list.size() - 1).change_position(new_position(x, 0.0f));
+
+				if (enemies_list.at(enemies_list.size() - 5).get_position().x >= 540.0f
+				 && enemies_list.at(enemies_list.size() - 5).get_position().y == 189.0f)
+					enemies_list.at(enemies_list.size() - 5).change_position(new_position(-6.0f, 0.0f));
+
+				if (enemies_list.at(enemies_list.size() - 5).get_position().x <= 540.0f
+				 && enemies_list.at(enemies_list.size() - 5).get_position().y <= 297.0f-6.0f)
+					enemies_list.at(enemies_list.size() - 5).change_position(new_position(0.0f, 6.0f));
+
+				if (enemies_list.at(enemies_list.size() - 5).get_position().x <= 675.0f
+				 && enemies_list.at(enemies_list.size() - 5).get_position().y >= 297.0f)
+					enemies_list.at(enemies_list.size() - 5).change_position(new_position(6.0f, 0.0f));
+
+				if (enemies_list.at(enemies_list.size() - 5).get_position().x >= 675.0f
+				 && enemies_list.at(enemies_list.size() - 5).get_position().y >= 189.0f)
+					enemies_list.at(enemies_list.size() - 5).change_position(new_position(0.0f, -6.0f));
+
+
+
+				if (enemies_list.at(11).get_position().x >= 162.0f
+					&& enemies_list.at(11).get_position().y == 189.0f)
+					enemies_list.at(11).change_position(new_position(-6.0f, 0.0f));
+
+				if (enemies_list.at(11).get_position().x <= 162.0f
+					&& enemies_list.at(11).get_position().y <= 297.0f - 6.0f)
+					enemies_list.at(11).change_position(new_position(0.0f, 6.0f));
+
+				if (enemies_list.at(11).get_position().x <= 297.0f
+					&& enemies_list.at(11).get_position().y >= 297.0f)
+					enemies_list.at(11).change_position(new_position(6.0f, 0.0f));
+
+				if (enemies_list.at(11).get_position().x >= 297.0f
+					&& enemies_list.at(11).get_position().y >= 189.0f)
+					enemies_list.at(11).change_position(new_position(0.0f, -6.0f));
+
+
+
+				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer, get_size())) {
+
+					std::cout << "Changing level\n";
+					Next_Level.despawn();
+					std::string level3 = "res/levels/test4.txt";
+					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
+
+				}
+			}
+			else if (current_level == 4) {
+
 				if (enemies_list.at(enemies_list.size() - 11).get_position().x >= 864.0f)
 				{
 					x = -10.5f;
@@ -194,7 +303,7 @@ public:
 				double current_time2 = glfwGetTime();
 				frame_count2++;
 				/* If a second has passed. */
-				if (current_time2 - previous_time2 >= 0.7)
+				if (current_time2 - previous_time2 >= 0.8)
 				{
 					// Display the frame count here any way you want.
 					
@@ -237,9 +346,19 @@ public:
 
 				enemies_list.at(48).change_position(new_position(x, 0.0f));
 
+				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer, get_size())) {
+
+					std::cout << "Congratulations!!! You won!\n";
+					Next_Level.despawn();
+					Game_Over(9.0f);
+
+				}
 			}
+			
+
 
 		}
+
 
 
 	}

@@ -45,8 +45,8 @@ public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
 	struct Vertex_Array *load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
-	struct Vertex_Array* Load_Menu(float width, float height);
-	void Game_Over();
+	struct Vertex_Array* Load_Menu(float width, float height, float text_id);
+	void Game_Over(float text_id);
 	unsigned int *make_indecies(int size);
 	
 	Vertex_Array* Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id);
@@ -71,9 +71,9 @@ public:
 	void update_player_position_y();
 	void render();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
+	void update_buffer();
 
 protected:
-	void update_buffer();
 	void handle_opengl();
 	Vertex_Array * fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id);
 

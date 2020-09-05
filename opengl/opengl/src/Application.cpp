@@ -16,7 +16,7 @@ int main(void)
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-#if 0
+#if 1
 	/* Create a windowed mode window and its OpenGL context */
 	GLFWwindow* window;
 	window = glfwCreateWindow(945, 540, "Hello World", NULL, NULL);
@@ -75,6 +75,7 @@ int main(void)
 		// - Only update at 60 frames / s
 		while (deltaTime >= 1.0) {
 			game.update();   // - Update function
+			game.update_buffer();
 			game.handle_collision(game.scale_h, game.scale_v, game.amount_x, game.amount_y, 0);
 			updates++;
 			deltaTime--;
