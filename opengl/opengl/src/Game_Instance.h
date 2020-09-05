@@ -67,7 +67,7 @@ public:
 				// Display the frame count here any way you want.
 				if (buffer[custom_sprite_list.at(0).get_buffer_index()[1]].position.x > 0.0f) {
 
-					std::cout << "Health decreasing...\n";
+					//std::cout << "Health decreasing...\n";
 					Change_Sprite_Scale(custom_sprite_list.at(0), -tile_size);
 
 				}
@@ -106,8 +106,10 @@ public:
 			for (int i = 0; i < enemies_list.size(); i++) {
 
 				if (check_if_obj_collides_with_obj(p1, enemies_list.at(i), buffer, get_size())) {
-					std::cout << "Collition Detected beetwen player and enemy\n";
+					//std::cout << "Collition Detected beetwen player and enemy\n";
 					p1.fix_position(new_position(81.0f, 27.0f));
+					amount_x = 0.0f;
+					amount_y = 0.0f;
 					Change_Sprite_Scale(custom_sprite_list.at(0), -tile_size/2);
 				}
 
@@ -119,7 +121,7 @@ public:
 					collectible_list.at(i).despawn();
 					if (buffer[custom_sprite_list.at(0).get_buffer_index()[1]].position.x <= 945.0f) {
 
-						std::cout << "Health increased...\n";
+						//std::cout << "Health increased...\n";
 						Change_Sprite_Scale(custom_sprite_list.at(0), 3*tile_size);
 
 					}
@@ -132,6 +134,8 @@ public:
 				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer, get_size())) {
 
 					std::cout << "Changing level\n";
+					amount_x = 0.0f;
+					amount_y = 0.0f;
 					Next_Level.despawn();
 					std::string level2 = "res/levels/test2.txt";
 					Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
@@ -167,6 +171,8 @@ public:
 				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer, get_size())) {
 
 					std::cout << "Changing level\n";
+					amount_x = 0.0f;
+					amount_y = 0.0f;
 					Next_Level.despawn();
 					std::string level3 = "res/levels/test3.txt";
 					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
@@ -279,6 +285,8 @@ public:
 				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer, get_size())) {
 
 					std::cout << "Changing level\n";
+					amount_x = 0.0f;
+					amount_y = 0.0f;
 					Next_Level.despawn();
 					std::string level3 = "res/levels/test4.txt";
 					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
@@ -287,7 +295,7 @@ public:
 			}
 			else if (current_level == 4) {
 
-				if (enemies_list.at(enemies_list.size() - 11).get_position().x >= 864.0f)
+				if (enemies_list.at(enemies_list.size() - 11).get_position().x >= 891.0f)
 				{
 					x = -10.5f;
 				}
@@ -308,7 +316,7 @@ public:
 					// Display the frame count here any way you want.
 					
 					if (despawn) {
-						std::cout << "Despawing...\n";
+						//std::cout << "Despawing...\n";
 						for (int i = 49; i < 64; i++) {
 							pos.push_back(enemies_list.at(i).get_position());
 							enemies_list.at(i).despawn();
@@ -317,7 +325,7 @@ public:
 
 					}
 					else {
-						std::cout << "Respawing...\n";
+						//std::cout << "Respawing...\n";
 						int j = 0;
 						for (int i = 49; i < 64; i++) {
 							enemies_list.at(i).respawn(pos.at(j));
@@ -354,12 +362,8 @@ public:
 
 				}
 			}
-			
-
 
 		}
-
-
 
 	}
 };

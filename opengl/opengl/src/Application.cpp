@@ -16,10 +16,10 @@ int main(void)
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-#if 1
+#if 0
 	/* Create a windowed mode window and its OpenGL context */
 	GLFWwindow* window;
-	window = glfwCreateWindow(945, 540, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(945, 540, "The Great Machine's Escape", NULL, NULL);
 	int refresh_rate = 144;
 #else
 	
@@ -33,7 +33,7 @@ int main(void)
 	int refresh_rate = mode->refreshRate;
 	std::cout << mode->refreshRate << "\n";
 
-	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "My Title", glfwGetPrimaryMonitor(), NULL); 
+	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "The Great Machine's Escape", glfwGetPrimaryMonitor(), NULL); 
 
 	
 #endif	
