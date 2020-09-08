@@ -1,6 +1,8 @@
 #include "Game.h"
 
-Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) : window(win), refresh_rate(refresh_rate), tile_size(character_scale)
+Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) 
+	: window(win), refresh_rate(refresh_rate), tile_size(character_scale), m_Camera(0.0f, width, 0.0f, height)
+
 {
 
 	total_buffer_size = (width / character_scale * height / character_scale) * 4;
@@ -314,41 +316,6 @@ void Game::update()
 {
 }
 
-void Game::update_player_position(float amount_x, float amount_y)
-{
-	//p1.change_position(glm::vec2(amount_x, amount_y));
-
-	buffer[p1.get_buffer_index()[0]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[0]].position.y += amount_y;
-	buffer[p1.get_buffer_index()[1]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[1]].position.y += amount_y;
-	buffer[p1.get_buffer_index()[2]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[2]].position.y += amount_y;
-	buffer[p1.get_buffer_index()[3]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[3]].position.y += amount_y;
-
-}
-
-
-void Game::update_player_position_x()
-{
-
-	buffer[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
-	buffer[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
-	buffer[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
-	buffer[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
-
-}
-
-void Game::update_player_position_y()
-{
-
-	buffer[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
-	buffer[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
-	buffer[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
-	buffer[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
-
-}
 
 
 
@@ -433,9 +400,19 @@ void Game::update_buffer()
 	
 }
 
+void Game::Update_Camera_Uniform() {
+	glm::mat4 vp = m_Camera.Get_View_Projection_Matrix();
+	GLCall(int location1 = glGetUniformLocation(shader, "u_VP"));
+	if (location1 == -1) {
+		std::cout << "Uniform not found!!!\n";
+	}
+	GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(vp)));
+}
+
 void Game::render()
 {
 	//update_buffer();
+	Update_Camera_Uniform();
 
 	/* set dynamic vertex buffer */
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb));
@@ -480,7 +457,7 @@ void Game::handle_opengl()
 
 	/* vertex attrib colors*/
 	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(struct Vertex_Array), (const void *)offsetof(Vertex_Array, color)));
+	GLCall(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(struct Vertex_Array), (const void*)offsetof(Vertex_Array, color)));
 
 	/* vertex attrib texture coordinates*/
 	GLCall(glEnableVertexAttribArray(2));
@@ -504,36 +481,74 @@ void Game::handle_opengl()
 	int samplers[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	GLCall(glUniform1iv(loc, 10, samplers));
 
-	glm::vec3 translationA(0, 0, 0);
+	//glm::vec3 translationA(0, 0, 0);
+	//glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+	//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+	//glm::mat4 projection = glm::ortho(0.0f, 945.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+	//glm::mat4 mvp = projection * view * model;
 
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
-	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-	glm::mat4 projection = glm::ortho(0.0f, 945.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+	glm::mat4 vp = m_Camera.Get_View_Projection_Matrix();
 
-	glm::mat4 mvp = projection * view * model;
-
-	GLCall(int location1 = glGetUniformLocation(shader, "u_MVP"));
+	GLCall(int location1 = glGetUniformLocation(shader, "u_VP"));
 	if (location1 == -1) {
 		std::cout << "Uniform not found!!!\n";
 	}
-	GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, &mvp[0][0]));
+	//GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, &mvp[0][0]));
+	GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(vp)));
 }
+
+void Game::update_player_position(float amount_x, float amount_y)
+{
+	//p1.change_position(glm::vec2(amount_x, amount_y));
+
+	buffer[p1.get_buffer_index()[0]].position.x += amount_x;
+	buffer[p1.get_buffer_index()[0]].position.y += amount_y;
+	buffer[p1.get_buffer_index()[1]].position.x += amount_x;
+	buffer[p1.get_buffer_index()[1]].position.y += amount_y;
+	buffer[p1.get_buffer_index()[2]].position.x += amount_x;
+	buffer[p1.get_buffer_index()[2]].position.y += amount_y;
+	buffer[p1.get_buffer_index()[3]].position.x += amount_x;
+	buffer[p1.get_buffer_index()[3]].position.y += amount_y;
+
+}
+
+
+void Game::update_player_position_x()
+{
+
+	buffer[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
+	buffer[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
+	buffer[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+	buffer[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
+
+}
+
+void Game::update_player_position_y()
+{
+
+	buffer[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
+	buffer[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+	buffer[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
+	buffer[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
+
+}
+
 
 void Game::handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis)
 {
 	/* change the position of the player in the x-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(amount_x, 0.0f);
-	//update_player_position_x();
 
 	/* check if there is collision on x-axis */
-	buffer = check_for_collitions(buffer, p1, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
+	buffer = check_for_collitions(buffer, &p1, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(0.0f, amount_y);
-	//update_player_position_y();
 
 	/* check if there is collision on y-axis */
-	buffer = check_for_collitions(buffer, p1, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
+	buffer = check_for_collitions(buffer, &p1, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
+
+	p1.set_teleport(false);
 }
 
 glm::vec2 Game::new_position(float width, float height)

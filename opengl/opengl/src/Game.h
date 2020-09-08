@@ -5,6 +5,8 @@
 #include "Shader.h"
 #include "Collision_Detection.h"
 #include<vector>
+#include "Orthographic_Camera.h"
+#include "glm/gtc/type_ptr.hpp"
 
 
 
@@ -29,6 +31,7 @@ private:
 	unsigned int * index_buffer;
 
 protected:
+	Orthographic_Camera m_Camera;
 	unsigned int texture_slot[32];
 	Player p1;
 
@@ -74,6 +77,7 @@ public:
 	void update_buffer();
 
 protected:
+	void Update_Camera_Uniform();
 	void handle_opengl();
 	Vertex_Array * fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id);
 
