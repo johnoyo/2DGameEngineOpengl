@@ -18,6 +18,8 @@ private:
 	unsigned int vb;
 	unsigned int ib;
 	unsigned int shader;
+	unsigned int level_h;
+	unsigned int level_w;
 public:
 	struct Vertex_Array * buffer;
 	std::vector<Player> enemies_list;
@@ -47,8 +49,8 @@ protected:
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
-	struct Vertex_Array *load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
-	struct Vertex_Array* Load_Menu(float width, float height, float text_id);
+	void load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
+	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
 	unsigned int *make_indecies(int size);
 	

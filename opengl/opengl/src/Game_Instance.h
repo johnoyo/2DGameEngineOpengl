@@ -34,6 +34,8 @@ public:
 		//std::cout << "Player index: " << p1.get_buffer_index()[0] << ", " << p1.get_buffer_index()[1] << ", " << p1.get_buffer_index()[2] << ", " << p1.get_buffer_index()[3] << "\n";
 		//std::cout << "Enemy index: " << enemies_list.at(0).get_buffer_index()[0] << ", " << enemies_list.at(0).get_buffer_index()[1] << ", " << enemies_list.at(0).get_buffer_index()[2] << ", " << enemies_list.at(0).get_buffer_index()[3] << "\n";
 
+		Load_Menu(945.0f, 540.0f, 2.0f);
+
 		p1.set_texture_id(0);
 		
 	}
@@ -57,7 +59,7 @@ public:
 				custom_sprite_list.push_back(health_bar);
 
 				Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
-				//m_Camera.Set_Position({ -945.0f/2.0f, -540.0f/2.0f, 0.0f });
+				m_Camera.Set_Position({ -945.0f/2.0f, -540.0f/2.0f, 0.0f });
 			}
 		}
 		else
@@ -111,7 +113,7 @@ public:
 				if (check_if_obj_collides_with_obj(p1, enemies_list.at(i), buffer, get_size())) {
 					//std::cout << "Collition Detected beetwen player and enemy\n";
 					p1.fix_position(new_position(81.0f, 27.0f));
-					//m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
+					m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
 					amount_x = 0.0f;
 					amount_y = 0.0f;
 					Change_Sprite_Scale(custom_sprite_list.at(0), -tile_size/2);
@@ -133,13 +135,13 @@ public:
 
 			}
 
-			/*m_Camera.Set_Position_y(p1.get_position().y - (540.0f/2.0f));
+			//m_Camera.Set_Position_y(p1.get_position().y - (540.0f/2.0f));
 			m_Camera.Incr_Position({ amount_x, 0.0f, 0.0f });
 
 			if (m_Camera.Get_Position().x < (-945.0f / 2.0f)) m_Camera.Set_Position_x(-945.0f / 2.0f);
 			if (m_Camera.Get_Position().x > (945.0f / 2.0f)) m_Camera.Set_Position_x(945.0f / 2.0f);
 
-			std::cout << "Camera pos: " << m_Camera.Get_Position().x << ", " << m_Camera.Get_Position().y << "\n";*/
+			std::cout << "Camera pos: " << m_Camera.Get_Position().x << ", " << m_Camera.Get_Position().y << "\n";
 
 			if (current_level == 1) {
 
@@ -151,7 +153,7 @@ public:
 					Next_Level.despawn();
 					std::string level2 = "res/levels/test2.txt";
 					Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
-					//m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
+					m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
 					
 				}
 
@@ -189,7 +191,7 @@ public:
 					Next_Level.despawn();
 					std::string level3 = "res/levels/test3.txt";
 					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
-					//m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
+					m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
 
 				}
 
@@ -304,7 +306,7 @@ public:
 					Next_Level.despawn();
 					std::string level3 = "res/levels/test4.txt";
 					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
-					//m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
+					m_Camera.Set_Position({ -945.0f / 2.0f, -540.0f / 2.0f, 0.0f });
 
 				}
 			}

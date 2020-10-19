@@ -4,13 +4,13 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 	: window(win), refresh_rate(refresh_rate), tile_size(character_scale), m_Camera(0.0f, width, 0.0f, height)
 
 {
-
-	total_buffer_size = (width / character_scale * height / character_scale) * 4;
+	/* TODO: make this better */
+	total_buffer_size = (100 * 100) * 4;
 	buffer = (struct Vertex_Array*)malloc(total_buffer_size * sizeof(struct Vertex_Array));
-	buffer = Load_Menu(width, height, 2.0f);
+	//Load_Menu(width, height, 2.0f);
 	index_buffer = make_indecies(get_size());
 
-	//buffer = load_level(buffer, level_path, width, height, character_scale);
+	//load_level(buffer, level_path, width, height, character_scale);
 
 	handle_opengl();
 	
@@ -41,7 +41,7 @@ Vertex_Array * Game::fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new
 	return vertex;
 }
 
-Vertex_Array* Game::Load_Menu(float width, float height, float text_id) {
+void Game::Load_Menu(float width, float height, float text_id) {
 
 	int index = 4;
 
@@ -54,14 +54,15 @@ Vertex_Array* Game::Load_Menu(float width, float height, float text_id) {
 
 	set_size(index);
 
-	return buffer;
+	index_buffer = make_indecies(get_size());
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
 
 }
 
 void Game::Game_Over(float text_id) {
 	custom_sprite_list.clear();
 	current_level = 0;
-	buffer = Load_Menu(945.0f, 540.0f, text_id);
+	Load_Menu(945.0f, 540.0f, text_id);
 	index_buffer = make_indecies(get_size());
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
 }
@@ -73,7 +74,7 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 	collectible_list.clear();
 	enemies_list.clear();
 
-	buffer = load_level(buffer, level_path, width, height, character_scale);
+	load_level(buffer, level_path, width, height, character_scale);
 	std::cout << "size: " << get_size() << ", total size: " << total_buffer_size << "\n";
 	index_buffer = make_indecies(get_size());
 
@@ -111,14 +112,33 @@ Game::~Game()
 }
 
 
-Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, float width, float height, float character_scale)
+void Game::load_level(Vertex_Array* vertex, std::string & level_path, float width, float height, float character_scale)
 {
 	FILE* f;
 	fopen_s(&f, level_path.c_str(), "r");
 
-	if (!f) return {};
+	if (!f) return;
 	char c;
-	int i = (height / character_scale) - 1, j = 0, s = 0;
+	char acc[2];
+	int i = 0, j = 0, s = 0, h = 0, w = 0;
+	int index = 0;
+
+	while ((c = fgetc(f)) != '\n') {
+		if (c == ',') {
+			index = 0;
+			h = atoi(acc);
+			continue;
+		}
+		if (c == '.') {
+			index = 0;
+			w = atoi(acc);
+			continue;
+		}
+		acc[index] = c;
+		index++;
+	}
+
+	i = h - 1;
 
 	struct pos {
 		int i;
@@ -151,7 +171,7 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 			p.push_back({ i,j,0.0 });
 			s = p.size() - 1;
 		}
-		if (j == int(width / character_scale)) {
+		if (j == w) {
 
 			j = 0;
 			i--;
@@ -161,7 +181,7 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 	}
 
 	//struct Vertex_Array *vertex = (struct Vertex_Array *)malloc(((p.size() + 1) * 4) * sizeof(struct Vertex_Array));
-	int index = 0;
+	index = 0;
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
 	vertex = fill_buffer(vertex, &index, new_position(0.0, height-27), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(6.0f));
@@ -243,7 +263,6 @@ Vertex_Array * Game::load_level(Vertex_Array* vertex, std::string & level_path, 
 
 	fclose(f);
 	set_size(index);
-	return vertex;
 }
 
 unsigned int *Game::make_indecies(int size)
