@@ -14,6 +14,7 @@
 #define EAST 2
 #define WEST 3
 
+
 #define DEBUG
 
 #define ASSERT(x) if (!(x)) __debugbreak();
@@ -43,8 +44,6 @@ struct sCell
 	bool edge_exist[4];
 	bool exist = false;
 };
-
-
 
 static void GLClearErrors()
 {

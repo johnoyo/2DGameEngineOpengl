@@ -138,6 +138,10 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		index++;
 	}
 
+	if (world != NULL) free(world);
+	world = (sCell*)malloc(h * w * sizeof(sCell));
+	for (int i = 0; i < h * w; i++)
+		world[i].exist = false;
 
 	i = h - 1;
 
@@ -181,10 +185,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		j++;
 	}
 
-	if (world != NULL) free(world);
-	world = (sCell*)malloc(h * w * sizeof(sCell));
-	for (int i = 0; i < h * w; i++)
-		world[i].exist = false;
+
 
 	//struct Vertex_Array *vertex = (struct Vertex_Array *)malloc(((p.size() + 1) * 4) * sizeof(struct Vertex_Array));
 	index = 0;
@@ -196,6 +197,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	vertex = fill_buffer(vertex, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(6.0f));
 	
 	for (int k = 0; k < p.size(); k++) {
+
 		if (k == s) continue;
 		/*std::cout << p.at(k).i << "," << p.at(k).j << "\n"; */
 
@@ -219,7 +221,6 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(p.at(k).k));
 			
 		world[p.at(k).i * w + p.at(k).j].exist = true;
-
 	}
 
 	set_size(index);
@@ -536,6 +537,24 @@ void Game::update_player_position_y()
 
 }
 
+
+void Game::handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis)
+{
+	/* change the position of the player in the x-axis (i.e last quad in vertex buffer) according to input */
+	update_player_position(amount_x, 0.0f);
+
+	/* check if there is collision on x-axis */
+	buffer = check_for_collitions(buffer, &p1, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
+
+	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
+	update_player_position(0.0f, amount_y);
+
+	/* check if there is collision on y-axis */
+	buffer = check_for_collitions(buffer, &p1, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
+
+	p1.set_teleport(false);
+}
+
 void Game::convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch)
 {
 	// Clear "PolyMap"
@@ -725,7 +744,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			rdy = (i == 0 ? e1.sy : e1.ey) - oy;
 
 			float base_ang = atan2f(rdy, rdx);
-
+			
 			rdx = radius * cosf(base_ang);
 			rdy = radius * sinf(base_ang);
 
@@ -736,28 +755,11 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			for (auto& e2 : vecEdges)
 			{
 				get_line_intersection(ox, oy, rdx, rdy,
-					e2.sx, e2.sy, e2.ex, e2.ey,
-					&i_x, &i_y);
+									  e2.sx, e2.sy, e2.ex, e2.ey,
+									  &i_x, &i_y);
 			}
 		}
 	}
-}
-
-void Game::handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis)
-{
-	/* change the position of the player in the x-axis (i.e last quad in vertex buffer) according to input */
-	update_player_position(amount_x, 0.0f);
-
-	/* check if there is collision on x-axis */
-	buffer = check_for_collitions(buffer, &p1, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
-
-	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
-	update_player_position(0.0f, amount_y);
-
-	/* check if there is collision on y-axis */
-	buffer = check_for_collitions(buffer, &p1, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
-
-	p1.set_teleport(false);
 }
 
 glm::vec2 Game::new_position(float width, float height)

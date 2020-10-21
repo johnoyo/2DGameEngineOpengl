@@ -27,8 +27,10 @@ public:
 	std::vector<Player> custom_sprite_list;
 	Player Next_Level;
 	float tile_size;
-	std::vector<sEdge> vecEdges;
+
 	sCell* world = NULL;
+	std::vector<sEdge> vecEdges;
+
 private:
 	unsigned int buffer_size;
 	unsigned int total_buffer_size;
