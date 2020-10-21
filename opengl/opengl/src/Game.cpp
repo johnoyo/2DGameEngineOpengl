@@ -185,8 +185,6 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		j++;
 	}
 
-
-
 	//struct Vertex_Array *vertex = (struct Vertex_Array *)malloc(((p.size() + 1) * 4) * sizeof(struct Vertex_Array));
 	index = 0;
 
@@ -437,6 +435,15 @@ void Game::render()
 	GLCall(glBindTextureUnit(9, texture_slot[9]));
 
 	GLCall(glDrawElements(GL_TRIANGLES, (get_size() / 4) * 6, GL_UNSIGNED_INT, NULL));
+}
+
+void Game::clean()
+{
+	GLCall(glDeleteBuffers(1, &vb));
+	GLCall(glDeleteProgram(shader));
+	GLCall(glDeleteVertexArrays(1, &vao));
+
+	GLCall(glDeleteTextures(10, texture_slot));
 }
 
 

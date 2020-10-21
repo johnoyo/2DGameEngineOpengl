@@ -99,6 +99,8 @@ int main(void)
 		glfwPollEvents();
 	}
 
+	game.clean();
+
 	glfwTerminate();
 	return 0;
 }

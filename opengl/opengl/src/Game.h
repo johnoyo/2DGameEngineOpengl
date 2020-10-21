@@ -79,6 +79,7 @@ public:
 	void update_player_position_x();
 	void update_player_position_y();
 	void render();
+	void clean();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
 	void update_buffer();
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
