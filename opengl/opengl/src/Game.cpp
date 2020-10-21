@@ -138,6 +138,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		index++;
 	}
 
+
 	i = h - 1;
 
 	struct pos {
@@ -149,26 +150,26 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	std::vector<pos> p;
 	while ((c = fgetc(f)) != EOF) {
 		if (c == 'B') {
-			p.push_back({ i,j,1.0 });
+			p.push_back({ i,j,1.0f });
 		}
 		else if (c == 'G') {
-			p.push_back({ i,j,2.0 });
+			p.push_back({ i,j,1.0f });
 		}
 		else if (c == 'C')
 		{
-			p.push_back({ i,j,3.0 });
+			p.push_back({ i,j,3.0f });
 		}
 		else if (c == 'E')
 		{
-			p.push_back({ i,j,4.0 });
+			p.push_back({ i,j,4.0f });
 		}
 		else if (c == '>')
 		{
-			p.push_back({ i,j,5.0 });
+			p.push_back({ i,j,8.0f });
 		}
 		else if (c == 'P')
 		{
-			p.push_back({ i,j,0.0 });
+			p.push_back({ i,j,0.0f });
 			s = p.size() - 1;
 		}
 		if (j == w) {
@@ -179,6 +180,11 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		}
 		j++;
 	}
+
+	if (world != NULL) free(world);
+	world = (sCell*)malloc(h * w * sizeof(sCell));
+	for (int i = 0; i < h * w; i++)
+		world[i].exist = false;
 
 	//struct Vertex_Array *vertex = (struct Vertex_Array *)malloc(((p.size() + 1) * 4) * sizeof(struct Vertex_Array));
 	index = 0;
@@ -193,49 +199,27 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		if (k == s) continue;
 		/*std::cout << p.at(k).i << "," << p.at(k).j << "\n"; */
 
-		if (p.at(k).k == 1.0) {
-
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(1.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(1.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(1.0f));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(1.0f));
-			
-		}
-		else if (p.at(k).k == 2.0f) {
-
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(1.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(1.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(1.0f));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(1.0f));
-
-		}
-		else if (p.at(k).k == 3.0f) {
+		
+		if (p.at(k).k == 3.0f) {
 
 			collectible_list.push_back(Player(3, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(3.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(3.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(3.0f));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(3.0f));
-
 		}
 		else if (p.at(k).k == 4.0f) {
 
 			enemies_list.push_back(Player(4, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(4.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(4.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(4.0f));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(4.0f));
-
 		}
-		else if (p.at(k).k == 5.0f) {
+		else if (p.at(k).k == 8.0f) {
 
-			Next_Level = Player(5, index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(8.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(8.0f));
-			vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(8.0f));
-			vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 0.93f, 0.24f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(8.0f));
-
+			Next_Level = Player(8, index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale));
 		}
+
+		vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(p.at(k).k));
+		vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(p.at(k).k));
+		vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(p.at(k).k));
+		vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(p.at(k).k));
+			
+		world[p.at(k).i * w + p.at(k).j].exist = true;
+
 	}
 
 	set_size(index);
@@ -552,6 +536,212 @@ void Game::update_player_position_y()
 
 }
 
+void Game::convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch)
+{
+	// Clear "PolyMap"
+	vecEdges.clear();
+
+	for (int x = 0; x < w; x++)
+		for (int y = 0; y < h; y++)
+			for (int j = 0; j < 4; j++)
+			{
+				world[(y + sy) * pitch + (x + sx)].edge_exist[j] = false;
+				world[(y + sy) * pitch + (x + sx)].edge_id[j] = 0;
+			}
+
+	// Iterate through region from top left to bottom right
+	for (int x = 1; x < w - 1; x++)
+		for (int y = 1; y < h - 1; y++)
+		{
+			// Create some convenient indices
+			int i = (y + sy) * pitch + (x + sx);			// This
+			int n = (y + sy - 1) * pitch + (x + sx);		// Northern Neighbour
+			int s = (y + sy + 1) * pitch + (x + sx);		// Southern Neighbour
+			int w = (y + sy) * pitch + (x + sx - 1);	// Western Neighbour
+			int e = (y + sy) * pitch + (x + sx + 1);	// Eastern Neighbour
+
+			// If this cell exists, check if it needs edges
+			if (world[i].exist)
+			{
+				// If this cell has no western neighbour, it needs a western edge
+				if (!world[w].exist)
+				{
+					// It can either extend it from its northern neighbour if they have
+					// one, or It can start a new one.
+					if (world[n].edge_exist[WEST])
+					{
+						// Northern neighbour has a western edge, so grow it downwards
+						vecEdges[world[n].edge_id[WEST]].ey += fBlockWidth;
+						world[i].edge_id[WEST] = world[n].edge_id[WEST];
+						world[i].edge_exist[WEST] = true;
+					}
+					else
+					{
+						// Northern neighbour does not have one, so create one
+						sEdge edge;
+						edge.sx = (sx + x) * fBlockWidth; edge.sy = (sy + y) * fBlockWidth;
+						edge.ex = edge.sx; edge.ey = edge.sy + fBlockWidth;
+
+						// Add edge to Polygon Pool
+						int edge_id = vecEdges.size();
+						vecEdges.push_back(edge);
+
+						// Update tile information with edge information
+						world[i].edge_id[WEST] = edge_id;
+						world[i].edge_exist[WEST] = true;
+					}
+				}
+
+				// If this cell dont have an eastern neignbour, It needs a eastern edge
+				if (!world[e].exist)
+				{
+					// It can either extend it from its northern neighbour if they have
+					// one, or It can start a new one.
+					if (world[n].edge_exist[EAST])
+					{
+						// Northern neighbour has one, so grow it downwards
+						vecEdges[world[n].edge_id[EAST]].ey += fBlockWidth;
+						world[i].edge_id[EAST] = world[n].edge_id[EAST];
+						world[i].edge_exist[EAST] = true;
+					}
+					else
+					{
+						// Northern neighbour does not have one, so create one
+						sEdge edge;
+						edge.sx = (sx + x + 1) * fBlockWidth; edge.sy = (sy + y) * fBlockWidth;
+						edge.ex = edge.sx; edge.ey = edge.sy + fBlockWidth;
+
+						// Add edge to Polygon Pool
+						int edge_id = vecEdges.size();
+						vecEdges.push_back(edge);
+
+						// Update tile information with edge information
+						world[i].edge_id[EAST] = edge_id;
+						world[i].edge_exist[EAST] = true;
+					}
+				}
+
+				// If this cell doesnt have a northern neignbour, It needs a northern edge
+				if (!world[n].exist)
+				{
+					// It can either extend it from its western neighbour if they have
+					// one, or It can start a new one.
+					if (world[w].edge_exist[NORTH])
+					{
+						// Western neighbour has one, so grow it eastwards
+						vecEdges[world[w].edge_id[NORTH]].ex += fBlockWidth;
+						world[i].edge_id[NORTH] = world[w].edge_id[NORTH];
+						world[i].edge_exist[NORTH] = true;
+					}
+					else
+					{
+						// Western neighbour does not have one, so create one
+						sEdge edge;
+						edge.sx = (sx + x) * fBlockWidth; edge.sy = (sy + y) * fBlockWidth;
+						edge.ex = edge.sx + fBlockWidth; edge.ey = edge.sy;
+
+						// Add edge to Polygon Pool
+						int edge_id = vecEdges.size();
+						vecEdges.push_back(edge);
+
+						// Update tile information with edge information
+						world[i].edge_id[NORTH] = edge_id;
+						world[i].edge_exist[NORTH] = true;
+					}
+				}
+
+				// If this cell doesnt have a southern neignbour, It needs a southern edge
+				if (!world[s].exist)
+				{
+					// It can either extend it from its western neighbour if they have
+					// one, or It can start a new one.
+					if (world[w].edge_exist[SOUTH])
+					{
+						// Western neighbour has one, so grow it eastwards
+						vecEdges[world[w].edge_id[SOUTH]].ex += fBlockWidth;
+						world[i].edge_id[SOUTH] = world[w].edge_id[SOUTH];
+						world[i].edge_exist[SOUTH] = true;
+					}
+					else
+					{
+						// Western neighbour does not have one, so I need to create one
+						sEdge edge;
+						edge.sx = (sx + x) * fBlockWidth; edge.sy = (sy + y + 1) * fBlockWidth;
+						edge.ex = edge.sx + fBlockWidth; edge.ey = edge.sy;
+
+						// Add edge to Polygon Pool
+						int edge_id = vecEdges.size();
+						vecEdges.push_back(edge);
+
+						// Update tile information with edge information
+						world[i].edge_id[SOUTH] = edge_id;
+						world[i].edge_exist[SOUTH] = true;
+					}
+				}
+
+			}
+
+		}
+}
+
+// Returns 1 if the lines intersect, otherwise 0. In addition, if the lines 
+// intersect the intersection point may be stored in the floats i_x and i_y.
+bool get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y,
+	float p2_x, float p2_y, float p3_x, float p3_y, float* i_x, float* i_y)
+{
+	float s1_x, s1_y, s2_x, s2_y;
+	s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+	s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+	float s, t;
+	s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+	t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+	if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+	{
+		// Collision detected
+		if (i_x != NULL)
+			*i_x = p0_x + (t * s1_x);
+		if (i_y != NULL)
+			*i_y = p0_y + (t * s1_y);
+		return true;
+	}
+
+	return false; // No collision
+}
+
+void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
+{
+
+	// For each edge in PolyMap
+	for (auto& e1 : vecEdges)
+	{
+		// Take the start point, then the end point (we could use a pool of
+		// non-duplicated points here, it would be more optimal)
+		for (int i = 0; i < 2; i++)
+		{
+			float rdx, rdy;
+			rdx = (i == 0 ? e1.sx : e1.ex) - ox;
+			rdy = (i == 0 ? e1.sy : e1.ey) - oy;
+
+			float base_ang = atan2f(rdy, rdx);
+
+			rdx = radius * cosf(base_ang);
+			rdy = radius * sinf(base_ang);
+
+			float i_x, i_y;
+			std::vector<sEdge> endingEdges;
+
+			// Check for ray intersection with all edges
+			for (auto& e2 : vecEdges)
+			{
+				get_line_intersection(ox, oy, rdx, rdy,
+					e2.sx, e2.sy, e2.ex, e2.ey,
+					&i_x, &i_y);
+			}
+		}
+	}
+}
 
 void Game::handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis)
 {

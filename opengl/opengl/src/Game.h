@@ -27,6 +27,8 @@ public:
 	std::vector<Player> custom_sprite_list;
 	Player Next_Level;
 	float tile_size;
+	std::vector<sEdge> vecEdges;
+	sCell* world = NULL;
 private:
 	unsigned int buffer_size;
 	unsigned int total_buffer_size;
@@ -77,6 +79,8 @@ public:
 	void render();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
 	void update_buffer();
+	void CalculateVisibilityPolygon(float ox, float oy, float radius);
+	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
 
 protected:
 	void Update_Camera_Uniform();
