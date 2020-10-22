@@ -37,6 +37,7 @@ struct sEdge
 	float sx, sy; // Start coordinate
 	float ex, ey; // End coordinate
 	float theta;
+
 };
 
 struct sCell

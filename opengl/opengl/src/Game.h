@@ -31,7 +31,6 @@ public:
 	sCell* world = NULL;
 	std::vector<sEdge> vecEdges;
 
-
 private:
 	unsigned int buffer_size;
 	unsigned int total_buffer_size;
@@ -86,6 +85,7 @@ public:
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
 	std::pdd lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
+
 
 protected:
 	void Update_Camera_Uniform();

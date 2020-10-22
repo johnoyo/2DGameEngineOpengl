@@ -189,16 +189,15 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	index = 0;
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
-	vertex = fill_buffer(vertex, &index, new_position(0.0f, 540.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(6.0f));
-	vertex = fill_buffer(vertex, &index, new_position(945.0f, 540.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(6.0f));
-	vertex = fill_buffer(vertex, &index, new_position(945.0f, 0.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(6.0f));
+	vertex = fill_buffer(vertex, &index, new_position(0.0f, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(6.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(6.0f));
+	vertex = fill_buffer(vertex, &index, new_position(width, 0.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(6.0f));
 	vertex = fill_buffer(vertex, &index, new_position(0.0f, 0.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(6.0f));
 	
 	for (int k = 0; k < p.size(); k++) {
 
 		if (k == s) continue;
 		/*std::cout << p.at(k).i << "," << p.at(k).j << "\n"; */
-
 		if (p.at(k).k == 3.0f) {
 
 			collectible_list.push_back(Player(3, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
@@ -211,6 +210,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 
 			Next_Level = Player(8, index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale));
 		}
+
 		/* NOTE: I dont take into account the colors yet, they get ignored in the shader.
 			     In the future i might add the option to have either textured or colored quads.*/
 		vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(0.18f, 0.6f, 0.96f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(p.at(k).k));
@@ -742,6 +742,7 @@ std::pdd Game::lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd
 		if (x >= D.first + 1 || y >= D.second + 1) return std::make_pair(FLT_MAX, FLT_MAX);
 		return std::make_pair(x, y);
 	}
+
 }
 
 // Returns 1 if the lines intersect, otherwise 0. In addition, if the lines 
@@ -757,7 +758,9 @@ bool get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y,
 	s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
 	t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
 
+
 	if (s >= 0.0f && s <= 1.0f && t >= 0.0f && t <= 1.0f)
+
 	{
 		// Collision detected
 		if (i_x != NULL)
@@ -769,6 +772,7 @@ bool get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y,
 
 	return false; // No collision
 }
+
 
 float find_min(float a, float b) {
 	return (b < a) ? b : a;
@@ -802,6 +806,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 		std::cout << e1.ex << ", " << e1.ey << "\n\n";
 	}
 
+
 	// For each edge in PolyMap
 	for (auto& e1 : vecEdges)
 	{
@@ -814,7 +819,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			rdy = (i == 0 ? e1.sy : e1.ey) - oy;
 
 			float base_ang = atan2f(rdy, rdx);
-			
+
 			rdx = radius * cosf(base_ang);
 			rdy = radius * sinf(base_ang);
 
@@ -823,6 +828,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 
 			float i_x = 0.0f, i_y = 0.0f;
 			std::vector<first_col> cols;
+
 
 			// Check for ray intersection with all edges
 			for (auto& e2 : vecEdges)
@@ -838,7 +844,8 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 					intersection.second == FLT_MAX)
 				{
 					std::cout << "The given lines AB and CD are parallel.\n";
-				} else
+				}
+				else
 				{
 					cols.push_back({ intersection.first, intersection.second, std::fabs((intersection.first - ox) + (intersection.second - oy)) });
 				}
@@ -850,19 +857,19 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			float ii_x = 0.0f, ii_y = 0.0f;
 
 			find_min_points(cols, ox, oy, &ii_x, &ii_y);
-			if(ii_x != 0.0f && ii_y != 0.0f) std::cout << "Min points: " << ii_x << ", " << ii_y << "\n";
+			if (ii_x != 0.0f && ii_y != 0.0f) std::cout << "Min points: " << ii_x << ", " << ii_y << "\n";
 
 			endingEdges.push_back({ ii_x, ii_y, rdx, rdy, base_ang });
-			
+
 		}
 	}
-
 	for (auto& e1 : endingEdges)
 	{
-		std::cout << "Start: " << e1.sx << ", " << e1.sy << "\n";
-		std::cout << "End:   " << e1.ex << ", " << e1.ey << "\n";
-		std::cout << "Angle: " << e1.theta << "\n";
+		std::cout << "Start : " << e1.sx << ", " << e1.sy << "\n";
+		std::cout << "End   : " << e1.ex << ", " << e1.ey << "\n";
+		std::cout << "Theta : " << e1.theta << "\n\n";
 	}
+
 }
 
 glm::vec2 Game::new_position(float width, float height)
