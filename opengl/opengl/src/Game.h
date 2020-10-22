@@ -18,13 +18,20 @@ private:
 	unsigned int vb;
 	unsigned int ib;
 	unsigned int shader;
+	unsigned int level_h;
+	unsigned int level_w;
 public:
 	struct Vertex_Array * buffer;
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
 	std::vector<Player> custom_sprite_list;
-	Player Next_Level;
+	Player Next_Level = Player(-11, 0);
 	float tile_size;
+
+	sCell* world = NULL;
+	std::vector<sEdge> vecEdges;
+
+
 private:
 	unsigned int buffer_size;
 	unsigned int total_buffer_size;
@@ -47,8 +54,8 @@ protected:
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
-	struct Vertex_Array *load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
-	struct Vertex_Array* Load_Menu(float width, float height, float text_id);
+	void load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
+	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
 	unsigned int *make_indecies(int size);
 	
@@ -73,8 +80,12 @@ public:
 	void update_player_position_x();
 	void update_player_position_y();
 	void render();
+	void clean();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
 	void update_buffer();
+	void CalculateVisibilityPolygon(float ox, float oy, float radius);
+	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
+	std::pdd lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
 
 protected:
 	void Update_Camera_Uniform();

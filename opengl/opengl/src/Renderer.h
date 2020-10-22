@@ -9,6 +9,12 @@
 #define Y_AXIS 2
 #define PI 3.14159265f
 
+#define NORTH 0
+#define SOUTH 1
+#define EAST 2
+#define WEST 3
+
+
 #define DEBUG
 
 #define ASSERT(x) if (!(x)) __debugbreak();
@@ -25,6 +31,24 @@ struct Vertex_Array {
 	glm::vec2 tex_coord;
 	float tex_id;
 };
+
+struct sEdge
+{
+	float sx, sy; // Start coordinate
+	float ex, ey; // End coordinate
+	float theta;
+};
+
+struct sCell
+{
+	int edge_id[4];
+	bool edge_exist[4];
+	bool exist = false;
+};
+
+struct first_col { float x; float y; float xy; };
+
+#define pdd pair<float, float>
 
 static void GLClearErrors()
 {

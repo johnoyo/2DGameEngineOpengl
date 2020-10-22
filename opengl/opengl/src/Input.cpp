@@ -29,6 +29,35 @@ int handle_input_hor(GLFWwindow* window, Player *p, float player_scale, float* a
 	return -1;
 }
 
+int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float player_scale, float* amount_y, float size, float* scale, bool is_grounded, int refresh_rate) {
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		/* std::cout << "Key D pressed\n"; */
+		*scale = -player_scale;
+
+		if (is_grounded) *amount_y = (player_scale / 10) * 2.4;
+		else *amount_y = (player_scale / 12) * 2.4;
+
+		(*p).change_position(glm::vec2(*amount_y, 0.0f));
+		return 0;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		/* std::cout << "Key A pressed\n"; */
+		*scale = player_scale;
+
+		if (is_grounded) *amount_y = -(player_scale / 10) * 2.4;
+		else *amount_y = -(player_scale / 12) * 2.4;
+
+		(*p).change_position(glm::vec2(*amount_y, 0.0f));
+		return 0;
+	}
+
+	return -1;
+}
+
 int handle_input_vert(GLFWwindow* window, Player *p, float player_scale, float* amount_y, float size, float* scale, bool is_grounded, bool collides, int refresh_rate) {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && is_grounded) {
 		/* std::cout << "Key W pressed\n"; */
