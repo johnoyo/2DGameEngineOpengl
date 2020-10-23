@@ -16,6 +16,12 @@ Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos) : tex
 	set_buffer_index(index, index + 1, index + 2, index + 3);
 }
 
+Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, int i, int j) : texture_id(texture_id), position(pos), k_pos(i), l_pos(j)
+{
+	health = 100.0f;
+	set_buffer_index(index, index + 1, index + 2, index + 3);
+}
+
 Player::Player(unsigned int texture_id, glm::vec2 custom_position_0, glm::vec2 custom_position_1, glm::vec2 custom_position_2, glm::vec2 custom_position_3)
 	: texture_id(texture_id), position(custom_position_3), custom_position_0(custom_position_0),
 	  custom_position_1(custom_position_1), custom_position_2(custom_position_2), custom_position_3(custom_position_3)
@@ -104,6 +110,16 @@ bool Player::get_teleport()
 void Player::despawn()
 {
 	fix_position(glm::vec2(-27.0f, -27.0f));
+}
+
+int Player::get_k_pos()
+{
+	return k_pos;
+}
+
+int Player::get_l_pos()
+{
+	return l_pos;
 }
 
 glm::vec2 Player::get_custom_position_0()

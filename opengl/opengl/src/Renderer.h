@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include <iostream>
+#include <algorithm>
 
 #define X_AXIS 1
 #define Y_AXIS 2
@@ -37,6 +38,7 @@ struct sEdge
 	float sx, sy; // Start coordinate
 	float ex, ey; // End coordinate
 	float theta;
+	bool is_external;
 
 };
 

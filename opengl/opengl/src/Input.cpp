@@ -41,7 +41,7 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float player_sca
 		if (is_grounded) *amount_y = (player_scale / 10) * 2.4;
 		else *amount_y = (player_scale / 12) * 2.4;
 
-		(*p).change_position(glm::vec2(*amount_y, 0.0f));
+		(*p).change_position(glm::vec2(0.0f, *amount_y));
 		return 0;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
@@ -51,7 +51,7 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float player_sca
 		if (is_grounded) *amount_y = -(player_scale / 10) * 2.4;
 		else *amount_y = -(player_scale / 12) * 2.4;
 
-		(*p).change_position(glm::vec2(*amount_y, 0.0f));
+		(*p).change_position(glm::vec2(0.0f, *amount_y));
 		return 0;
 	}
 

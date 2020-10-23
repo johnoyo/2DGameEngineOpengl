@@ -11,30 +11,14 @@
 
 
 class Game {
-private:
-	GLFWwindow * window;
-
-	unsigned int vao;
-	unsigned int vb;
-	unsigned int ib;
-	unsigned int shader;
-	unsigned int level_h;
-	unsigned int level_w;
 public:
 	struct Vertex_Array * buffer;
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
 	std::vector<Player> custom_sprite_list;
+	std::vector<Player> shadow_quad_list;
 	Player Next_Level = Player(-11, 0);
 	float tile_size;
-
-	sCell* world = NULL;
-	std::vector<sEdge> vecEdges;
-
-private:
-	unsigned int buffer_size;
-	unsigned int total_buffer_size;
-	unsigned int * index_buffer;
 
 protected:
 	Orthographic_Camera m_Camera;
@@ -50,9 +34,33 @@ protected:
 	float refresh_rate;
 	int current_level;
 
+private:
+	GLFWwindow * window;
+
+	unsigned int vao;
+	unsigned int vb;
+	unsigned int ib;
+	unsigned int shader;
+	unsigned int level_h;
+	unsigned int level_w;
+
+	sCell* world = NULL;
+	std::vector<sEdge> vecEdges;
+	std::vector<sEdge> endingEdges;
+	std::vector<glm::vec2> edges;
+	std::vector<float> angles;
+	std::vector<first_col> duo;
+
+	unsigned int buffer_size;
+	unsigned int total_buffer_size;
+	unsigned int * index_buffer;
+	unsigned int white_texture_id;
+	unsigned int size_without_shadows;
+
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
+	void Init_Transparent_Texture();
 	void load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
 	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
@@ -85,6 +93,8 @@ public:
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
 	std::pdd lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
+	void Init_Shadows();
+	void Calculate_Shadows();
 
 
 protected:
