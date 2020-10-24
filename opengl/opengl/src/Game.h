@@ -55,7 +55,7 @@ private:
 	unsigned int total_buffer_size;
 	unsigned int * index_buffer;
 	unsigned int white_texture_id;
-	unsigned int size_without_shadows;
+	unsigned int size_without_shadows = 0;
 
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
@@ -92,9 +92,14 @@ public:
 	void update_buffer();
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
-	std::pdd lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
+	std::pdd lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
+	std::pdd lineLineIntersection1(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
 	void Init_Shadows();
-	void Calculate_Shadows();
+	void Calculate_Shadows0();
+	void Calculate_Shadows1();
+	bool is_Edge_Connected(float x1, float y1, float x2, float y2);
+	sEdge Find_Next_Edge(sEdge e2);
+	sEdge Find_Starting_Edge(float x, float y);
 
 
 protected:

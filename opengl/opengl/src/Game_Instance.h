@@ -38,7 +38,7 @@ public:
 
 		Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
 		convert_quads_to_polygons(0, 0, 35, 20, 27.0f, 35);
-		CalculateVisibilityPolygon(p1.get_position().x, p1.get_position().y, 1500.0f);
+		CalculateVisibilityPolygon(p1.get_position().x + (p1.get_scale()/2), p1.get_position().y + (p1.get_scale() / 2), 1500.0f);
 	
 		Init_Shadows();
 
@@ -63,8 +63,8 @@ public:
 		if (scale_h > 0) p1.set_texture_id(7);
 		else  p1.set_texture_id(5);
 
-		CalculateVisibilityPolygon(p1.get_position().x, p1.get_position().y, 1500.0f);
-		Calculate_Shadows();
+		CalculateVisibilityPolygon(p1.get_position().x + (p1.get_scale() / 2), p1.get_position().y + (p1.get_scale() / 2), 1500.0f);
+		Calculate_Shadows1();
 
 		//m_Camera.Set_Position_y(p1.get_position().y - (540.0f/2.0f));
 		//m_Camera.Incr_Position({ amount_x, 0.0f, 0.0f });

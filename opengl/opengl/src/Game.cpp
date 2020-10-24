@@ -762,7 +762,7 @@ void Game::convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockW
 
 }
 
-std::pdd Game::lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd D)
+std::pdd Game::lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pdd D)
 {
 	// Line AB represented as a1x + b1y = c1 
 	float a1 = B.second - A.second;
@@ -786,8 +786,39 @@ std::pdd Game::lineLineIntersection(std::pdd A, std::pdd B, std::pdd C, std::pdd
 	{
 		float x = (b2 * c1 - b1 * c2) / determinant;
 		float y = (a1 * c2 - a2 * c1) / determinant;
-		if (x <= C.first - 1 || y <= C.second - 1) return std::make_pair(FLT_MAX, FLT_MAX);
-		if (x >= D.first + 1 || y >= D.second + 1) return std::make_pair(FLT_MAX, FLT_MAX);
+		if (x <= C.first - 1.0f || y <= C.second - 1.0f) return std::make_pair(FLT_MAX, FLT_MAX);
+		if (x >= D.first + 1.0f || y >= D.second + 1.0f) return std::make_pair(FLT_MAX, FLT_MAX);
+		return std::make_pair(x, y);
+	}
+
+}
+
+std::pdd Game::lineLineIntersection1(std::pdd A, std::pdd B, std::pdd C, std::pdd D)
+{
+	// Line AB represented as a1x + b1y = c1 
+	float a1 = B.second - A.second;
+	float b1 = A.first - B.first;
+	float c1 = a1 * (A.first) + b1 * (A.second);
+
+	// Line CD represented as a2x + b2y = c2 
+	float a2 = D.second - C.second;
+	float b2 = C.first - D.first;
+	float c2 = a2 * (C.first) + b2 * (C.second);
+
+	float determinant = a1 * b2 - a2 * b1;
+
+	if (determinant == 0)
+	{
+		// The lines are parallel. This is simplified 
+		// by returning a pair of FLT_MAX 
+		return std::make_pair(FLT_MAX, FLT_MAX);
+	}
+	else
+	{
+		float x = (b2 * c1 - b1 * c2) / determinant;
+		float y = (a1 * c2 - a2 * c1) / determinant;
+		if (x < C.first || y < C.second) return std::make_pair(FLT_MAX, FLT_MAX);
+		if (x > D.first || y > D.second) return std::make_pair(FLT_MAX, FLT_MAX);
 		return std::make_pair(x, y);
 	}
 
@@ -846,7 +877,9 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 		std::cout << e1.ex << ", " << e1.ey << "\n\n";
 	}*/
 
-
+	int counter0 = 0;
+	int counter1 = 0;
+	float save_rdx = 0.0f, save_rdy = 0.0f;
 	// For each edge in PolyMap
 	for (auto& e1 : edges)
 	{
@@ -874,7 +907,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			std::pdd C = std::make_pair(e2.sx, e2.sy);
 			std::pdd D = std::make_pair(e2.ex, e2.ey);
 
-			std::pdd intersection = lineLineIntersection(A, B, C, D);
+			std::pdd intersection = lineLineIntersection0(A, B, C, D);
 
 			if (intersection.first == FLT_MAX &&
 				intersection.second == FLT_MAX)
@@ -889,9 +922,12 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 
 		float ii_x = 0.0f, ii_y = 0.0f;
 		find_min_points(cols, ox, oy, &ii_x, &ii_y);
+		save_rdx = rdx;
+		save_rdy = rdy;
 
 		float ang = 0;
-		int counter = 0;
+		counter0 = 0;
+		counter1 = 0;
 
 		std::vector<sEdge> tmp;
 
@@ -903,8 +939,8 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 
 		for (int j = 0; j < 2; j++)
 		{
-			if (j == 0)	ang = base_ang - 0.0001f;
-			if (j == 2)	ang = base_ang + 0.0001f;
+			if (j == 0)	ang = base_ang - 0.001f;
+			if (j == 1)	ang = base_ang + 0.001f;
 
 			rdx = radius * cosf(ang);
 			rdy = radius * sinf(ang);
@@ -923,21 +959,23 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 				std::pdd C = std::make_pair(e2.sx, e2.sy);
 				std::pdd D = std::make_pair(e2.ex, e2.ey);
 
-				std::pdd intersection = lineLineIntersection(A, B, C, D);
+				std::pdd intersection = lineLineIntersection0(A, B, C, D);
 
-				if (intersection.first == FLT_MAX &&
-					intersection.second == FLT_MAX)
+				if (intersection.first != FLT_MAX &&
+					intersection.second != FLT_MAX)
 				{
-					counter++;
+					if (j == 0)	counter0++;
+					if (j == 1)	counter1++;
+					
 				}
 			}
 
 
 		}
-		if(counter == 2)
-			endingEdges.push_back({ ii_x, ii_y, rdx, rdy, base_ang, true });
+		if(counter0 == 0 || counter1 == 0)
+			endingEdges.push_back({ ii_x, ii_y, save_rdx, save_rdy, base_ang, true });
 		else
-			endingEdges.push_back({ ii_x, ii_y, rdx, rdy, base_ang, false });
+			endingEdges.push_back({ ii_x, ii_y, save_rdx, save_rdy, base_ang, false });
 
 	}
 	/*for (auto& e1 : endingEdges)
@@ -947,21 +985,26 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 		std::cout << "Theta : " << e1.theta << "\n\n";
 	}*/
 
+	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(0).sx), std::ceilf(endingEdges.at(0).sy), std::ceilf(endingEdges.at(1).sx), std::ceilf(endingEdges.at(1).sy)) << "\n";
+	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(2).sx), std::ceilf(endingEdges.at(2).sy), std::ceilf(endingEdges.at(3).sx), std::ceilf(endingEdges.at(3).sy)) << "\n";
+	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(1).sx), std::ceilf(endingEdges.at(1).sy), std::ceilf(endingEdges.at(2).sx), std::ceilf(endingEdges.at(2).sy)) << "\n";
+	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(1).sx), std::ceilf(endingEdges.at(1).sy), std::ceilf(endingEdges.at(3).sx), std::ceilf(endingEdges.at(3).sy)) << "\n";
+
 	angles.clear();
 	for (auto& e1 : endingEdges)
 	{
 		angles.push_back({ e1.theta });
 	}
 
-	for (auto& e2 : angles)
-		std::cout << e2 << "\n";
+	/*for (auto& e2 : angles)
+		std::cout << e2 << "\n";*/
 
 	std::sort(angles.begin(), angles.end(), std::greater<float>());
 
-	std::cout << "\n\n";
+	/*std::cout << "\n\n";
 
 	for (auto& e2 : angles)
-		std::cout << e2 << "\n";
+		std::cout << e2 << "\n";*/
 
 }
 
@@ -987,6 +1030,54 @@ int find_edge(std::vector<sEdge> c, float angle) {
 	}
 }
 
+bool Point_IsEqual(float e1x, float e1y, float e2x, float e2y) {
+	return ((e1x == e2x) && (e1y == e2y));
+}
+
+sEdge Game::Find_Next_Edge(sEdge e2) {
+	for (auto& e1 : vecEdges)
+	{
+		if (Point_IsEqual(e1.sx, e1.sy, e2.ex, e2.ey) || Point_IsEqual(e1.ex, e1.ey, e2.ex, e2.ey) && e2.sx != e1.sx && e2.sy != e1.sy) return e1;
+	}
+	return { FLT_MAX, FLT_MAX, FLT_MAX , FLT_MAX, FLT_MAX };
+}
+
+sEdge Game::Find_Starting_Edge(float x, float y) {
+	for (auto& e1 : vecEdges)
+	{
+		if (Point_IsEqual(e1.sx, e1.sy, x, y) || Point_IsEqual(e1.ex, e1.ey, x, y)) return e1;
+	}
+	return { FLT_MAX, FLT_MAX, FLT_MAX , FLT_MAX, FLT_MAX };
+}
+
+bool Edge_Exists_In(float x, float y, std::vector<glm::vec2> v) {
+
+	for (auto& e1 : v)
+	{
+		if (Point_IsEqual(x, y, e1.x, e1.y)) return true;
+	}
+	return false;
+}
+
+bool Game::is_Edge_Connected(float x1, float y1, float x2, float y2) {
+
+	if (!Edge_Exists_In(x1, y1, edges) || !Edge_Exists_In(x2, y2, edges)) {
+		return true;
+	}
+
+	sEdge prev_e = { FLT_MAX, FLT_MAX, FLT_MAX , FLT_MAX, FLT_MAX };
+	sEdge e = Find_Starting_Edge(x1, y1);
+	while (!Point_IsEqual(e.sx, e.sy, prev_e.sx, prev_e.sy) && !Point_IsEqual(e.sx, e.sy, prev_e.ex, prev_e.ey)) {
+
+		if (Point_IsEqual(e.sx, e.sy, x2, y2) || Point_IsEqual(e.ex, e.ey, x2, y2)) return true;
+
+		prev_e = e;
+		e = Find_Next_Edge(e);
+	}
+
+	return false;
+}
+
 
 void Game::Init_Shadows()
 {
@@ -995,7 +1086,7 @@ void Game::Init_Shadows()
 	size_without_shadows = get_size();
 	
 
-	int save_index = 0;
+	/*int save_index = 0;
 
 	for (int i = 0; i < endingEdges.size(); i++) {
 		float min = 10000.0f, prev_min = 10000.0f;
@@ -1029,7 +1120,7 @@ void Game::Init_Shadows()
 
 		std::cout << "i,j: " << duo.at(i).x << " ,,, " << duo.at(i).y << "\n";
 
-	}
+	}*/
 
 	//for (int i = 0; i < duo.size(); i++) {
 
@@ -1077,12 +1168,13 @@ void Game::Init_Shadows()
 		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(2).sx, endingEdges.at(2).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
 		*/
 
-	int k = 0, l = 0;;
+	int k = 0, l = 0;
 	for (int i = 0; i < angles.size() - 1; i++) {
-		if (angles.at(0) > 2.0f) {
+		if (angles.at(i) >= 2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
 			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), k, l));
 
@@ -1092,9 +1184,10 @@ void Game::Init_Shadows()
 				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
 			}
 		}
-		else if (angles.at(0) < 2.0f && angles.at(0) > 0.0f) {
+		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
 			k = find_edge(endingEdges, angles.at(i));
 			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
 
@@ -1104,10 +1197,11 @@ void Game::Init_Shadows()
 				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
 			}
 		}
-		else if (angles.at(0) < -2.0f) {
+		else if (angles.at(i) <= -2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
 			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
 
@@ -1117,10 +1211,11 @@ void Game::Init_Shadows()
 				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
 			}
 		}
-		else if (angles.at(0) > -2.0f && angles.at(0) < 0.0f) {
+		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
 			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), k, l));
 
@@ -1134,7 +1229,7 @@ void Game::Init_Shadows()
 
 
 	set_size(index);
-	std::cout << "Size : " << get_size() << "\n\n";
+	//std::cout << "Size : " << get_size() << "\n\n";
 
 	if (index_buffer != NULL) free(index_buffer);
 	index_buffer = make_indecies(get_size());
@@ -1142,14 +1237,124 @@ void Game::Init_Shadows()
 
 		//}
 }
+void Game::Calculate_Shadows0() {
 
-void Game::Calculate_Shadows() {
+	int k = 0, l = 0;
+	for (int i = 0; i < angles.size() - 1; i++) {
+
+		if (angles.at(i) > 2.0f) {
+
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if(true){
+				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+			}
+		}
+		else if (angles.at(i) < 2.0f && angles.at(i) > 0.0f) {
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (true) {
+				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+			}
+		}
+		else if (angles.at(i) < -2.0f) {
+
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (true) {
+				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+			}
+		}
+		else if (angles.at(i) > -2.0f && angles.at(i) < 0.0f) {
+
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (true) {
+				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+
+			}
+		}
+	}
+
+}
+
+void Game::Calculate_Shadows1() {
 
 	//std::cout << "Size : " << get_size() << "\n\n";
-
-
+	//is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy);
+	int index = size_without_shadows;
+	int k = 0, l = 0;
 	for (int i = 0; i < angles.size() - 1; i++) {
-		if (angles.at(0) > 2.0f) {
+		if (angles.at(i) > 2.0f) {
+
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+				
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+			}
+		}
+		else if (angles.at(i) < 2.0f && angles.at(i) > 0.0f) {
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+				
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+			}
+		}
+		else if (angles.at(i) < -2.0f) {
+
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+				
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+			}
+		}
+		else if (angles.at(i) > -2.0f && angles.at(i) < 0.0f) {
+
+			k = find_edge(endingEdges, angles.at(i));
+			l = find_edge(endingEdges, angles.at(i + 1));
+			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+				
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+			}
+		}
+	}
+	
+		/*if (angles.at(0) > 2.0f) {
 
 			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ey);
 			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sy);
@@ -1180,8 +1385,8 @@ void Game::Calculate_Shadows() {
 			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sy);
 			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sy);
 
-		}
-	}
+		}*/
+	//}
 
 
 
@@ -1203,7 +1408,6 @@ void Game::Calculate_Shadows() {
 			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_max_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_max_pos()).sy);
 
 		}*/
-
 	//}
 
 	/*buffer[shadow_quad_list.at(0).get_buffer_index()[0]].position = new_position(endingEdges.at(3).sx, endingEdges.at(3).sy);
