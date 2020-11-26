@@ -728,9 +728,7 @@ void Game::convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockW
 						world[i].edge_exist[SOUTH] = true;
 					}
 				}
-
 			}
-
 		}
 
 	bool flag1 = false, flag2 = false;
@@ -762,6 +760,42 @@ void Game::convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockW
 
 }
 
+inline float Det(float a, float b, float c, float d)
+{
+	return a * d - b * c;
+}
+
+///Calculate intersection of two lines.
+///\return true if found, false if not found or error
+bool LineLineIntersect(std::pdd A, std::pdd B, std::pdd C, std::pdd D, float& ixOut, float& iyOut) //Output 
+{
+	//http://mathworld.wolfram.com/Line-LineIntersection.html
+
+	float detL1 = Det(A.first, A.second, B.first, B.second);
+	float detL2 = Det(C.first, C.second, D.first, D.second);
+	float x1mx2 = A.first - B.first;
+	float x3mx4 = C.first - D.first;
+	float y1my2 = A.second - B.second;
+	float y3my4 = C.second - D.second;
+	
+	float xnom = Det(detL1, x1mx2, detL2, x3mx4);
+	float ynom = Det(detL1, y1my2, detL2, y3my4);
+	float denom = Det(x1mx2, y1my2, x3mx4, y3my4);
+	if (denom == 0.0)//Lines don't seem to cross
+	{
+		ixOut = NAN;
+		iyOut = NAN;
+		return false;
+	}
+
+	ixOut = xnom / denom;
+	iyOut = ynom / denom;
+	if (!isfinite(ixOut) || !isfinite(iyOut)) //Probably a numerical issue
+		return false;
+
+	return true; //All OK
+}
+
 std::pdd Game::lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pdd D)
 {
 	// Line AB represented as a1x + b1y = c1 
@@ -786,43 +820,110 @@ std::pdd Game::lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pd
 	{
 		float x = (b2 * c1 - b1 * c2) / determinant;
 		float y = (a1 * c2 - a2 * c1) / determinant;
+		if (std::fabsf(x - C.first) < 0.0001f || std::fabsf(y - C.second) < 0.0001f
+		    || std::fabsf(x - D.first) < 0.0001f || std::fabsf(y - D.second) < 0.0001f) return std::make_pair(x, y);
 		if (x <= C.first - 1.0f || y <= C.second - 1.0f) return std::make_pair(FLT_MAX, FLT_MAX);
 		if (x >= D.first + 1.0f || y >= D.second + 1.0f) return std::make_pair(FLT_MAX, FLT_MAX);
-		return std::make_pair(x, y);
+		return std::make_pair(FLT_MAX, FLT_MAX);
+		/*if (x <= C.first - 1.0f || y <= C.second - 1.0f) return std::make_pair(FLT_MAX, FLT_MAX);
+		if (x >= D.first + 1.0f || y >= D.second + 1.0f) return std::make_pair(FLT_MAX, FLT_MAX);
+		return std::make_pair(x, y);*/
 	}
 
 }
 
 std::pdd Game::lineLineIntersection1(std::pdd A, std::pdd B, std::pdd C, std::pdd D)
 {
-	// Line AB represented as a1x + b1y = c1 
-	float a1 = B.second - A.second;
-	float b1 = A.first - B.first;
-	float c1 = a1 * (A.first) + b1 * (A.second);
+	
+	// A.first A.second B.first B.second C.first C.second D.first D.second
+	//   x1		y1        x2      y2       x3      y3      x4       y4
+	/*float den = ((A.first - B.first) * (C.second - D.second) - (A.second - B.second) * (C.first - D.first));
 
-	// Line CD represented as a2x + b2y = c2 
-	float a2 = D.second - C.second;
-	float b2 = C.first - D.first;
-	float c2 = a2 * (C.first) + b2 * (C.second);
+	if(den == 0) return std::make_pair(FLT_MAX, FLT_MAX);
 
-	float determinant = a1 * b2 - a2 * b1;
+	float t = ((A.first - C.first) * (C.second - D.second) - (A.second - C.second) * (C.first - D.first)) / den;
+	float u = -((A.first - B.first) * (A.second - C.second) - (A.second - B.second) * (A.first - C.first)) / den;
 
-	if (determinant == 0)
-	{
-		// The lines are parallel. This is simplified 
-		// by returning a pair of FLT_MAX 
-		return std::make_pair(FLT_MAX, FLT_MAX);
-	}
-	else
-	{
-		float x = (b2 * c1 - b1 * c2) / determinant;
-		float y = (a1 * c2 - a2 * c1) / determinant;
-		if (x < C.first || y < C.second) return std::make_pair(FLT_MAX, FLT_MAX);
-		if (x > D.first || y > D.second) return std::make_pair(FLT_MAX, FLT_MAX);
-		return std::make_pair(x, y);
-	}
+	if(t > 0.0f && t < 1.0f && u >= 0.0f) return std::make_pair(A.first + t * (A.first - B.first), A.second + t * (A.second - B.second));
+	else return std::make_pair(FLT_MAX, FLT_MAX);*/
+
+	// Store the values for fast access and easy
+	// equations-to-code conversion
+	float x1 = A.first, x2 = B.first, x3 = C.first, x4 = D.first;
+	float y1 = A.second, y2 = B.second, y3 = C.second, y4 = D.second;
+
+	float d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+	// If d is zero, there is no intersection
+	if (d == 0) return std::make_pair(FLT_MAX, FLT_MAX);
+
+	// Get the x and y
+	float pre = (x1 * y2 - y1 * x2), post = (x3 * y4 - y3 * x4);
+	float x = (pre * (x3 - x4) - (x1 - x2) * post) / d;
+	float y = (pre * (y3 - y4) - (y1 - y2) * post) / d;
+
+	float f = x - std::floorf(x);
+	float c = std::ceilf(x) - x;
+	float xx = (f <= c) ? std::floorf(x) : std::ceilf(x);
+	if (f < 0.0001f || c < 0.0001f) x = xx;
+
+	f = y - std::floorf(y);
+	c = std::ceilf(y) - y;
+	float yy = (f <= c) ? std::floorf(y) : std::ceilf(y);
+	if (f < 0.0001f || c < 0.0001f) y = yy;
+
+	// Check if the x and y coordinates are within both lines
+	if (x < std::min(x1, x2) || x > std::max(x1, x2) ||
+		x < std::min(x3, x4) || x > std::max(x3, x4)) return std::make_pair(FLT_MAX, FLT_MAX);
+	if (y < std::min(y1, y2) || y > std::max(y1, y2) ||
+		y < std::min(y3, y4) || y > std::max(y3, y4)) return std::make_pair(FLT_MAX, FLT_MAX);
+
+	// Return the point of intersection
+	return std::make_pair(x, y);
 
 }
+
+bool onLine(std::pdd A, std::pdd B, float x, float y) {   //check whether p is on the line or not
+	if (x <= std::max(A.first, B.first) && x <= std::min(A.first, B.first) &&
+		(y <= std::max(A.second, B.second) && y <= std::min(A.second, B.second)))
+		return true;
+
+	return false;
+}
+
+int direction(std::pdd a, std::pdd b, std::pdd c) {
+	int val = (b.second - a.second) * (c.first - b.first) - (b.first - a.first) * (c.second - b.second);
+	if (val == 0)
+		return 0;     //colinear
+	else if (val < 0)
+		return 2;    //anti-clockwise direction
+	return 1;    //clockwise direction
+}
+
+bool Game::lineLineIntersection2(std::pdd A, std::pdd B, std::pdd C, std::pdd D) {
+	//four direction for two lines and points of other line
+	int dir1 = direction(A, B, C);
+	int dir2 = direction(A, B, D);
+	int dir3 = direction(C, D, A);
+	int dir4 = direction(C, D, B);
+
+	if (dir1 != dir2 && dir3 != dir4)
+		return true; //they are intersecting
+
+	if (dir1 == 0 && onLine(A, B, C.first, C.second)) //when p2 of line2 are on the line1
+		return true;
+
+	if (dir2 == 0 && onLine(A, B, D.first, D.second)) //when p1 of line2 are on the line1
+		return true;
+
+	if (dir3 == 0 && onLine(C, D, A.first, A.second)) //when p2 of line1 are on the line2
+		return true;
+
+	if (dir4 == 0 && onLine(C, D, B.first, B.second)) //when p1 of line1 are on the line2
+		return true;
+
+	return false;
+}
+
 
 float find_min(float a, float b) {
 	return (b < a) ? b : a;
@@ -870,6 +971,7 @@ void find_max_points(std::vector<first_col> c, float ox, float oy, float* i_x, f
 
 void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 {
+	std::vector<first_col> cols;
 	endingEdges.clear();
 	/*for (auto& e1 : vecEdges)
 	{
@@ -880,9 +982,12 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 	int counter0 = 0;
 	int counter1 = 0;
 	float save_rdx = 0.0f, save_rdy = 0.0f;
+	std::vector<sEdge> tmp;
 	// For each edge in PolyMap
 	for (auto& e1 : edges)
 	{
+		cols.clear();
+
 		float rdx, rdy;
 		rdx = e1.x - ox;
 		rdy = e1.y - oy;
@@ -896,8 +1001,6 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 		rdy += oy;
 
 		float i_x = 0.0f, i_y = 0.0f;
-		std::vector<first_col> cols;
-
 
 		// Check for ray intersection with all edges
 		for (auto& e2 : vecEdges)
@@ -907,7 +1010,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			std::pdd C = std::make_pair(e2.sx, e2.sy);
 			std::pdd D = std::make_pair(e2.ex, e2.ey);
 
-			std::pdd intersection = lineLineIntersection0(A, B, C, D);
+			std::pdd intersection = lineLineIntersection1(A, B, C, D);
 
 			if (intersection.first == FLT_MAX &&
 				intersection.second == FLT_MAX)
@@ -918,6 +1021,13 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 			{
 				cols.push_back({ intersection.first, intersection.second, sqrtf(std::fabsf(intersection.first * intersection.first - ox * ox) + std::fabsf(intersection.second * intersection.second - oy * oy)) });
 			}
+
+			/*float tmp_x, tmp_y;
+			if (LineLineIntersect(A, B, C, D, tmp_x, tmp_y)) {
+				cols.push_back({ tmp_x, tmp_y, sqrtf(std::fabsf(tmp_x * tmp_x - ox * ox) + std::fabsf(tmp_y * tmp_y - oy * oy)) });
+			}*/
+
+
 		}
 
 		float ii_x = 0.0f, ii_y = 0.0f;
@@ -929,18 +1039,37 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 		counter0 = 0;
 		counter1 = 0;
 
-		std::vector<sEdge> tmp;
+		tmp.clear();
+
+		float f = ii_x - std::floorf(ii_x);
+		float c = std::ceilf(ii_x) - ii_x;
+		float x = (f <= c) ? std::floorf(ii_x) : std::ceilf(ii_x);
+
+		f = ii_y - std::floorf(ii_y);
+		c = std::ceilf(ii_y) - ii_y;
+		float y = (f <= c) ? std::floorf(ii_y) : std::ceilf(ii_y);
 
 		for (auto& e2 : vecEdges)
 		{
+			if (e2.sx == x && e2.sy == y) tmp.push_back({ e2.sx, e2.sy, e2.ex, e2.ey, e2.theta });
+			if (e2.ex == x && e2.ey == y) tmp.push_back({ e2.sx, e2.sy, e2.ex, e2.ey, e2.theta });
+		}
+
+		if (tmp.size() == 0) {
+			endingEdges.push_back({ ii_x, ii_y, save_rdx, save_rdy, base_ang, false });
+			continue;
+		}
+
+		/*for (auto& e2 : vecEdges)
+		{
 			if (e2.sx == e1.x && e2.sy == e1.y) tmp.push_back({ e2.sx, e2.sy, e2.ex, e2.ey, e2.theta });
 			if (e2.ex == e1.x && e2.ey == e1.y) tmp.push_back({ e2.sx, e2.sy, e2.ex, e2.ey, e2.theta });
-		}
+		}*/
 
 		for (int j = 0; j < 2; j++)
 		{
-			if (j == 0)	ang = base_ang - 0.001f;
-			if (j == 1)	ang = base_ang + 0.001f;
+			if (j == 0)	ang = base_ang - 0.0001f;
+			if (j == 1)	ang = base_ang + 0.0001f;
 
 			rdx = radius * cosf(ang);
 			rdy = radius * sinf(ang);
@@ -959,7 +1088,7 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 				std::pdd C = std::make_pair(e2.sx, e2.sy);
 				std::pdd D = std::make_pair(e2.ex, e2.ey);
 
-				std::pdd intersection = lineLineIntersection0(A, B, C, D);
+				std::pdd intersection = lineLineIntersection1(A, B, C, D);
 
 				if (intersection.first != FLT_MAX &&
 					intersection.second != FLT_MAX)
@@ -968,6 +1097,13 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 					if (j == 1)	counter1++;
 					
 				}
+
+				/*if (lineLineIntersection2(A, B, C, D))
+				{
+					if (j == 0)	counter0++;
+					if (j == 1)	counter1++;
+
+				}*/
 			}
 
 
@@ -985,11 +1121,6 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 		std::cout << "Theta : " << e1.theta << "\n\n";
 	}*/
 
-	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(0).sx), std::ceilf(endingEdges.at(0).sy), std::ceilf(endingEdges.at(1).sx), std::ceilf(endingEdges.at(1).sy)) << "\n";
-	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(2).sx), std::ceilf(endingEdges.at(2).sy), std::ceilf(endingEdges.at(3).sx), std::ceilf(endingEdges.at(3).sy)) << "\n";
-	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(1).sx), std::ceilf(endingEdges.at(1).sy), std::ceilf(endingEdges.at(2).sx), std::ceilf(endingEdges.at(2).sy)) << "\n";
-	//std::cout << "Connected : " << is_Edge_Connected(std::ceilf(endingEdges.at(1).sx), std::ceilf(endingEdges.at(1).sy), std::ceilf(endingEdges.at(3).sx), std::ceilf(endingEdges.at(3).sy)) << "\n";
-
 	angles.clear();
 	for (auto& e1 : endingEdges)
 	{
@@ -1001,9 +1132,9 @@ void Game::CalculateVisibilityPolygon(float ox, float oy, float radius)
 
 	std::sort(angles.begin(), angles.end(), std::greater<float>());
 
-	/*std::cout << "\n\n";
+	//std::cout << "\n\n";
 
-	for (auto& e2 : angles)
+	/*for (auto& e2 : angles)
 		std::cout << e2 << "\n";*/
 
 }
@@ -1169,11 +1300,11 @@ void Game::Init_Shadows()
 		*/
 
 	int k = 0, l = 0;
-	for (int i = 0; i < angles.size() - 1; i++) {
+	for (int i = 0; i < angles.size(); i++) {
 		if (angles.at(i) >= 2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), k, l));
@@ -1186,7 +1317,7 @@ void Game::Init_Shadows()
 		}
 		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
@@ -1200,7 +1331,7 @@ void Game::Init_Shadows()
 		else if (angles.at(i) <= -2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
@@ -1214,7 +1345,7 @@ void Game::Init_Shadows()
 		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1)%angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), k, l));
@@ -1235,17 +1366,17 @@ void Game::Init_Shadows()
 	index_buffer = make_indecies(get_size());
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
 
-		//}
 }
+
 void Game::Calculate_Shadows0() {
 
 	int k = 0, l = 0;
-	for (int i = 0; i < angles.size() - 1; i++) {
+	for (int i = 0; i < angles.size(); i++) {
 
-		if (angles.at(i) > 2.0f) {
+		if (angles.at(i) >= 2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if(true){
 				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
@@ -1254,9 +1385,9 @@ void Game::Calculate_Shadows0() {
 				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
 			}
 		}
-		else if (angles.at(i) < 2.0f && angles.at(i) > 0.0f) {
+		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (true) {
 				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
@@ -1265,10 +1396,10 @@ void Game::Calculate_Shadows0() {
 				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
 			}
 		}
-		else if (angles.at(i) < -2.0f) {
+		else if (angles.at(i) <= -2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (true) {
 				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
@@ -1277,10 +1408,10 @@ void Game::Calculate_Shadows0() {
 				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
 			}
 		}
-		else if (angles.at(i) > -2.0f && angles.at(i) < 0.0f) {
+		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (true) {
 				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
@@ -1300,56 +1431,110 @@ void Game::Calculate_Shadows1() {
 	//is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy);
 	int index = size_without_shadows;
 	int k = 0, l = 0;
-	for (int i = 0; i < angles.size() - 1; i++) {
-		if (angles.at(i) > 2.0f) {
+	//for (int i = 0; i < angles.size(); i++) {
+	//	if (angles.at(i) >= 2.0f) {
+
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//		}
+	//	}
+	//	else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//		}
+	//	}
+	//	else if (angles.at(i) <= -2.0f) {
+
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//		}
+	//	}
+	//	else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
+
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//		}
+	//	}
+	//}
+
+	for (int i = 0; i < angles.size(); i++) {
+		if (angles.at(i) >= 2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+
 				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
 			}
 		}
-		else if (angles.at(i) < 2.0f && angles.at(i) > 0.0f) {
+		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+
 				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
 			}
 		}
-		else if (angles.at(i) < -2.0f) {
+		else if (angles.at(i) <= -2.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+
 				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
 			}
 		}
-		else if (angles.at(i) > -2.0f && angles.at(i) < 0.0f) {
+		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
 			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at(i + 1));
+			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
 			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
 			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+
 				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
 			}
 		}
 	}
@@ -1424,6 +1609,45 @@ void Game::Calculate_Shadows1() {
 	buffer[shadow_quad_list.at(2).get_buffer_index()[1]].position = new_position(endingEdges.at(0).ex, endingEdges.at(0).ey);
 	buffer[shadow_quad_list.at(2).get_buffer_index()[2]].position = new_position(endingEdges.at(2).ex, endingEdges.at(2).ey);
 	buffer[shadow_quad_list.at(2).get_buffer_index()[3]].position = new_position(endingEdges.at(2).sx, endingEdges.at(2).sy);*/
+
+}
+
+void Game::Init_Shadow_points()
+{
+	shadow_quad_list.clear();
+	int index = get_size();
+	size_without_shadows = get_size();
+
+	for (auto& e : endingEdges) {
+
+		buffer = fill_buffer(buffer, &index, new_position(e.sx, e.sy + 2.0f), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
+		buffer = fill_buffer(buffer, &index, new_position(e.sx + 2.0f, e.sy + 2.0f), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
+		buffer = fill_buffer(buffer, &index, new_position(e.sx + 2.0f, e.sy), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
+		buffer = fill_buffer(buffer, &index, new_position(e.sx, e.sy), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
+
+	}
+
+	set_size(index);
+	//std::cout << "Size : " << get_size() << "\n\n";
+
+	if (index_buffer != NULL) free(index_buffer);
+	index_buffer = make_indecies(get_size());
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+
+}
+
+void Game::Calculate_Shadow_points()
+{
+	int index = size_without_shadows;
+
+	for (auto& e : endingEdges) {
+
+		buffer[index++].position = new_position(e.sx, e.sy + 2.0f);
+		buffer[index++].position = new_position(e.sx + 2.0f, e.sy + 2.0f);
+		buffer[index++].position = new_position(e.sx + 2.0f, e.sy);
+		buffer[index++].position = new_position(e.sx, e.sy);
+
+	}
 
 }
 

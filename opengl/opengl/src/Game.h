@@ -78,6 +78,8 @@ public:
 	unsigned int get_size();
 	struct Vertex_Array *get_buffer();
 
+	std::vector<int> l;
+
 	void set_player(Player p);
 	Player get_player();
 	void set_enemies(std::vector<Player> enemies_list);
@@ -94,9 +96,12 @@ public:
 	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
 	std::pdd lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
 	std::pdd lineLineIntersection1(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
+	bool lineLineIntersection2(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
 	void Init_Shadows();
 	void Calculate_Shadows0();
 	void Calculate_Shadows1();
+	void Init_Shadow_points();
+	void Calculate_Shadow_points();
 	bool is_Edge_Connected(float x1, float y1, float x2, float y2);
 	sEdge Find_Next_Edge(sEdge e2);
 	sEdge Find_Starting_Edge(float x, float y);

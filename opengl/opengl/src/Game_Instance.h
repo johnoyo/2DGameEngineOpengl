@@ -41,12 +41,15 @@ public:
 		CalculateVisibilityPolygon(p1.get_position().x + (p1.get_scale()/2), p1.get_position().y + (p1.get_scale() / 2), 1500.0f);
 	
 		Init_Shadows();
+		//Init_Shadow_points();
 
 		p1.set_texture_id(5);
+		//m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - 540.0f / 2.0f, 0.0f });
 		
 	}
 
 	void update() override {
+		//std::cout << p1.get_position().x << "..." << p1.get_position().y << "\n";
 		amount_x = 0.0;
 		amount_y = 0.0;
 
@@ -55,6 +58,7 @@ public:
 
 		/* Check for input on y-axis */
 		handle_input_vert_no_gravity(get_window(), &p1, 26.0f, &amount_y, get_size(), &scale_v, Is_Grounded_y, refresh_rate);
+
 
 		/* TODO: find out why "scale_v" it doesnt work by reference */
 		if (amount_y > 0) scale_v = -26.0f;
@@ -65,8 +69,10 @@ public:
 
 		CalculateVisibilityPolygon(p1.get_position().x + (p1.get_scale() / 2), p1.get_position().y + (p1.get_scale() / 2), 1500.0f);
 		Calculate_Shadows1();
+		//Calculate_Shadow_points();
 
 		//m_Camera.Set_Position_y(p1.get_position().y - (540.0f/2.0f));
+		//m_Camera.Incr_Position({ 0.0f, amount_y, 0.0f });
 		//m_Camera.Incr_Position({ amount_x, 0.0f, 0.0f });
 
 		//if (m_Camera.Get_Position().x < (-945.0f / 2.0f)) m_Camera.Set_Position_x(-945.0f / 2.0f);
