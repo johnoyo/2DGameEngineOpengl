@@ -573,13 +573,14 @@ void Game::handle_collision(float scale_h, float scale_v, float amount_x, float 
 	update_player_position(amount_x, 0.0f);
 
 	/* check if there is collision on x-axis */
-	buffer = check_for_collitions(buffer, &p1, size_without_shadows, scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
+	/* NOTE: in line 577 and 583 the size was size_without_shows and i changed it to get_size() */
+	buffer = check_for_collitions(buffer, &p1, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(0.0f, amount_y);
 
 	/* check if there is collision on y-axis */
-	buffer = check_for_collitions(buffer, &p1, size_without_shadows, scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
+	buffer = check_for_collitions(buffer, &p1, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
 
 	p1.set_teleport(false);
 }
@@ -834,18 +835,6 @@ std::pdd Game::lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pd
 
 std::pdd Game::lineLineIntersection1(std::pdd A, std::pdd B, std::pdd C, std::pdd D)
 {
-	
-	// A.first A.second B.first B.second C.first C.second D.first D.second
-	//   x1		y1        x2      y2       x3      y3      x4       y4
-	/*float den = ((A.first - B.first) * (C.second - D.second) - (A.second - B.second) * (C.first - D.first));
-
-	if(den == 0) return std::make_pair(FLT_MAX, FLT_MAX);
-
-	float t = ((A.first - C.first) * (C.second - D.second) - (A.second - C.second) * (C.first - D.first)) / den;
-	float u = -((A.first - B.first) * (A.second - C.second) - (A.second - B.second) * (A.first - C.first)) / den;
-
-	if(t > 0.0f && t < 1.0f && u >= 0.0f) return std::make_pair(A.first + t * (A.first - B.first), A.second + t * (A.second - B.second));
-	else return std::make_pair(FLT_MAX, FLT_MAX);*/
 
 	// Store the values for fast access and easy
 	// equations-to-code conversion
@@ -1214,90 +1203,8 @@ void Game::Init_Shadows()
 {
 	shadow_quad_list.clear();
 	int index = get_size();
+	/* NOTE: put this size in collision detecting function to work properly */
 	size_without_shadows = get_size();
-	
-
-	/*int save_index = 0;
-
-	for (int i = 0; i < endingEdges.size(); i++) {
-		float min = 10000.0f, prev_min = 10000.0f;
-		bool flag1 = false, flag2 = false;
-		for (int j = 0; j < endingEdges.size(); j++) {
-			if (j != i) {
-				if(endingEdges.at(j).sx >= endingEdges.at(i).sx){
-					prev_min = min;
-					min = find_min(std::fabsf(endingEdges.at(i).theta - endingEdges.at(j).theta), min);
-					if (min < prev_min) save_index = j;
-				}
-			}
-		}
-		if (endingEdges.at(i).theta > endingEdges.at(save_index).theta) {
-			for (int k = 0; k < duo.size(); k++) {
-				if ((duo.at(k).x == i && duo.at(k).y == save_index) || i == save_index) flag1 = true;
-			}
-			if(!flag1) duo.push_back({ (float)i, (float)save_index, -1.0f });
-			flag1 = false;
-		}
-		else {
-			for (int k = 0; k < duo.size(); k++) {
-				if ((duo.at(k).y == i && duo.at(k).x == save_index) || i == save_index) flag2 = true;
-			}
-			if (!flag2) duo.push_back({ (float)save_index, (float)i, -1.0f });
-			flag2 = false;
-		}
-	}
-
-	for (int i = 0; i < duo.size(); i++) {
-
-		std::cout << "i,j: " << duo.at(i).x << " ,,, " << duo.at(i).y << "\n";
-
-	}*/
-
-	//for (int i = 0; i < duo.size(); i++) {
-
-	//	//if (p1.get_position().x > endingEdges.at(0).sx) {
-
-	//		shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(duo.at(i).x).ex, endingEdges.at(duo.at(i).x).ey), duo.at(i).x, duo.at(i).y));
-
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).y).ex, endingEdges.at(duo.at(i).y).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).y).sx, endingEdges.at(duo.at(i).y).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).x).sx, endingEdges.at(duo.at(i).x).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).x).ex, endingEdges.at(duo.at(i).x).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-
-	//	/*}
-	//	else {
-	//		shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(duo.at(i).x).sx, endingEdges.at(duo.at(i).x).sy), duo.at(i).x, duo.at(i).y));
-
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).y).sx, endingEdges.at(duo.at(i).y).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).y).ex, endingEdges.at(duo.at(i).y).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).x).ex, endingEdges.at(duo.at(i).x).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-	//		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(duo.at(i).x).sx, endingEdges.at(duo.at(i).x).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-
-	//	}*/
-
-	//}
-
-		/*shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(3).sx, endingEdges.at(3).sy)));
-
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(1).sx, endingEdges.at(1).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(1).ex, endingEdges.at(1).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(3).ex, endingEdges.at(3).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(3).sx, endingEdges.at(3).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-		
-		shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(0).sx, endingEdges.at(0).sy)));
-
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(3).sx, endingEdges.at(3).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(3).ex, endingEdges.at(3).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(0).ex, endingEdges.at(0).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(0).sx, endingEdges.at(0).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-
-		shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(2).sx, endingEdges.at(2).sy)));
-
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(0).sx, endingEdges.at(0).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(0).ex, endingEdges.at(0).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(2).ex, endingEdges.at(2).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(2).sx, endingEdges.at(2).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-		*/
 
 	int k = 0, l = 0;
 	for (int i = 0; i < angles.size(); i++) {
@@ -1431,59 +1338,6 @@ void Game::Calculate_Shadows1() {
 	//is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy);
 	int index = size_without_shadows;
 	int k = 0, l = 0;
-	//for (int i = 0; i < angles.size(); i++) {
-	//	if (angles.at(i) >= 2.0f) {
-
-	//		k = find_edge(endingEdges, angles.at(i));
-	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-	//			
-	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-	//		}
-	//	}
-	//	else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
-	//		k = find_edge(endingEdges, angles.at(i));
-	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-	//			
-	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-	//		}
-	//	}
-	//	else if (angles.at(i) <= -2.0f) {
-
-	//		k = find_edge(endingEdges, angles.at(i));
-	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-	//			
-	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-	//		}
-	//	}
-	//	else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
-
-	//		k = find_edge(endingEdges, angles.at(i));
-	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-	//			
-	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-	//		}
-	//	}
-	//}
 
 	for (int i = 0; i < angles.size(); i++) {
 		if (angles.at(i) >= 2.0f) {
@@ -1538,77 +1392,7 @@ void Game::Calculate_Shadows1() {
 			}
 		}
 	}
-	
-		/*if (angles.at(0) > 2.0f) {
 
-			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ey);
-
-		}
-		else if (angles.at(0) < 2.0f && angles.at(0) > 0.0f) {
-
-			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sy);
-
-		}
-		else if (angles.at(0) < -2.0f) {
-
-			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sy);
-
-		}
-		else if (angles.at(0) > -2.0f && angles.at(0) < 0.0f) {
-
-			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_k_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_l_pos()).sy);
-
-		}*/
-	//}
-
-
-
-	//for (int i = 0; i < shadow_quad_list.size(); i++) {
-
-		//if (p1.get_position().x > endingEdges.at(0).sx) {
-
-			/*buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_min_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_min_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_min_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_min_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_max_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_max_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_max_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_max_pos()).ey);*/
-
-		/*}
-		else {
-
-			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_min_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_min_pos()).sy);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_min_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_min_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_max_pos()).ex, endingEdges.at(shadow_quad_list.at(i).get_max_pos()).ey);
-			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(shadow_quad_list.at(i).get_max_pos()).sx, endingEdges.at(shadow_quad_list.at(i).get_max_pos()).sy);
-
-		}*/
-	//}
-
-	/*buffer[shadow_quad_list.at(0).get_buffer_index()[0]].position = new_position(endingEdges.at(3).sx, endingEdges.at(3).sy);
-	buffer[shadow_quad_list.at(0).get_buffer_index()[1]].position = new_position(endingEdges.at(3).ex, endingEdges.at(3).ey);
-	buffer[shadow_quad_list.at(0).get_buffer_index()[2]].position = new_position(endingEdges.at(1).ex, endingEdges.at(1).ey);
-	buffer[shadow_quad_list.at(0).get_buffer_index()[3]].position = new_position(endingEdges.at(1).sx, endingEdges.at(1).sy);
-
-	buffer[shadow_quad_list.at(1).get_buffer_index()[0]].position = new_position(endingEdges.at(3).sx, endingEdges.at(3).sy);
-	buffer[shadow_quad_list.at(1).get_buffer_index()[1]].position = new_position(endingEdges.at(3).ex, endingEdges.at(3).ey);
-	buffer[shadow_quad_list.at(1).get_buffer_index()[2]].position = new_position(endingEdges.at(0).ex, endingEdges.at(0).ey);
-	buffer[shadow_quad_list.at(1).get_buffer_index()[3]].position = new_position(endingEdges.at(0).sx, endingEdges.at(0).sy);
-
-	buffer[shadow_quad_list.at(2).get_buffer_index()[0]].position = new_position(endingEdges.at(0).sx, endingEdges.at(0).sy);
-	buffer[shadow_quad_list.at(2).get_buffer_index()[1]].position = new_position(endingEdges.at(0).ex, endingEdges.at(0).ey);
-	buffer[shadow_quad_list.at(2).get_buffer_index()[2]].position = new_position(endingEdges.at(2).ex, endingEdges.at(2).ey);
-	buffer[shadow_quad_list.at(2).get_buffer_index()[3]].position = new_position(endingEdges.at(2).sx, endingEdges.at(2).sy);*/
 
 }
 
