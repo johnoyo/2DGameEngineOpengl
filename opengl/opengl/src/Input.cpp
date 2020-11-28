@@ -1,26 +1,27 @@
 #include "Input.h"
 
-int handle_input_hor(GLFWwindow* window, Player *p, float player_scale, float* amount_x, float size, float* scale, bool is_grounded, int refresh_rate) {
+int handle_input_hor(GLFWwindow* window, Player *p, float speed, float acc, float player_scale, float* amount_x, float size, float* scale, bool is_grounded, int refresh_rate) {
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		/* std::cout << "Key D pressed\n"; */
+		 /*std::cout << "Key D pressed\n"; */
 		*scale = -player_scale;
 
-		if (is_grounded) *amount_x = (player_scale / 10)*2.4;
-		else *amount_x = (player_scale / 12)*2.4;
+		if (is_grounded) *amount_x = speed * acc;
+		else *amount_x = (speed - 1);
 		
 		(*p).change_position(glm::vec2(*amount_x, 0.0f));
 		return 0;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		/* std::cout << "Key A pressed\n"; */
+		 /*std::cout << "Key A pressed\n"; */
 		*scale = player_scale;
 
-		if (is_grounded) *amount_x = -(player_scale / 10)*2.4;
-		else *amount_x = -(player_scale / 12)*2.4;
+		if (is_grounded) *amount_x = -speed * acc;
+		else *amount_x = -(speed - 1);
+
 
 		(*p).change_position(glm::vec2(*amount_x, 0.0f));
 		return 0;
@@ -29,7 +30,7 @@ int handle_input_hor(GLFWwindow* window, Player *p, float player_scale, float* a
 	return -1;
 }
 
-int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float player_scale, float* amount_y, float size, float* scale, bool is_grounded, int refresh_rate) {
+int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float speed, float acc, float player_scale, float* amount_y, float size, float* scale, bool is_grounded, int refresh_rate) {
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -38,8 +39,8 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float player_sca
 		/* std::cout << "Key D pressed\n"; */
 		*scale = -player_scale;
 
-		if (is_grounded) *amount_y = (player_scale / 10) * 2.4;
-		else *amount_y = (player_scale / 12) * 2.4;
+		if (is_grounded) *amount_y = speed * acc;
+		else *amount_y = (speed - 1);
 
 		(*p).change_position(glm::vec2(0.0f, *amount_y));
 		return 0;
@@ -48,8 +49,8 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float player_sca
 		/* std::cout << "Key A pressed\n"; */
 		*scale = player_scale;
 
-		if (is_grounded) *amount_y = -(player_scale / 10) * 2.4;
-		else *amount_y = -(player_scale / 12) * 2.4;
+		if (is_grounded) *amount_y = -speed * acc;
+		else *amount_y = -(speed - 1);
 
 		(*p).change_position(glm::vec2(0.0f, *amount_y));
 		return 0;

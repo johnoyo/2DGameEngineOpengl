@@ -9,22 +9,23 @@ class Game_Instance : public Game {
 	using Game::Game;
 
 public:
-	float amount_x = 0.0, amount_y = 0.0, amount_xx = 0.0, amount_yy = 0.0, scale_h = 0.0, scale_v = 0.0;
-	float x = 0.0f, y = 0.0f, y1 = 0.0f;
+	float amount_x = 0.0f, amount_y = 0.0f, amount_xx = 0.0f, amount_yy = 0.0f, scale_h = 0.0f, scale_v = 0.0f;
+	float x = 0.0f, y = 0.0f, y1 = 0.0f, acc = 0.0f;
+	int hor = -1;
 
 	float xx = 0.0f, yy = 0.0f, angle = 0.0f, angle1 = 180.0f;;
 
 	double previous_time = glfwGetTime();
 	int frame_count = 0;
-	float current_time = 0.0, dt = 0.0;
+	float current_time = 0.0f, dt = 0.0f;
 
 	double previous_time1 = glfwGetTime();
 	int frame_count1 = 0;
-	float current_time1 = 0.0;
+	float current_time1 = 0.0f;
 
 	double previous_time2 = glfwGetTime();
 	int frame_count2 = 0;
-	float current_time2 = 0.0;
+	float current_time2 = 0.0f;
 
 	bool despawn = true;
 
@@ -37,7 +38,7 @@ public:
 		Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
 		m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 
-		//p1.set_texture_id(5);
+		p1.set_texture_id(5);
 		//m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 		
 	}
@@ -50,27 +51,31 @@ public:
 			else if (glfwGetKey(get_window(), GLFW_KEY_SPACE) == GLFW_PRESS) {
 				std::string level2 = "res/levels/test2.txt";
 
-				//Player health_bar = Player(5, new_position(0.0, 540.0f), new_position(945.0f, 540.0f), new_position(945.0f, 513.0f), new_position(0.0, 513.0f));
-				//custom_sprite_list.push_back(health_bar);
-
 				Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
 				m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 
-				//m_Camera.Set_Position({ -945.0f/2.0f, -540.0f/2.0f, 0.0f });
 			}
 		}
 		else
 		{
-			//std::cout << p1.get_position().x << "..." << p1.get_position().y << "\n";
-			if (Is_Grounded_y) amount_x = 0.0;
-			//amount_y = 0.0;
+			if (Is_Grounded_y) {
+				if (scale_h < 0) {
+					if (amount_x > 0) amount_x -= 0.5f;
+					else amount_x = 0;
+				} else {
+					if (amount_x < 0) amount_x += 0.5f;
+					else amount_x = 0;
+				}
+			}
 
 			/* Check for input on x-axis */
-			handle_input_hor(get_window(), &p1, 26.0f, &amount_x, buffer.Get_Size(), &scale_h, Is_Grounded_y, refresh_rate);
+			hor = handle_input_hor(get_window(), &p1, 5.0f, acc, 26.0f, &amount_x, buffer.Get_Size(), &scale_h, Is_Grounded_y, refresh_rate);
 
 			/* Check for input on y-axis */
 			handle_input_vert(get_window(), &p1, 26.0f, &amount_y, buffer.Get_Size(), &scale_v, Is_Grounded_y, Collides_y, refresh_rate);
 
+			if (hor == 0) acc = acc + 0.1f;
+			else acc = 0.0f;
 
 			/* TODO: find out why "scale_v" it doesnt work by reference */
 			if (amount_y > 0) scale_v = -26.0f;
@@ -78,6 +83,9 @@ public:
 
 			if (scale_h > 0) p1.set_texture_id(7);
 			else  p1.set_texture_id(5);
+
+			if (amount_x > 5.0f) amount_x = 5.0f;
+			if (amount_x < -5.0f) amount_x = -5.0f;
 
 			//m_Camera.Set_Position_y(p1.get_position().y - (540.0f/2.0f));
 			//m_Camera.Incr_Position({ 0.0f, amount_y, 0.0f });
