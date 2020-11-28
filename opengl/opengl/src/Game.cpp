@@ -6,17 +6,30 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 {
 	/* TODO: make this better */
 	total_buffer_size = (100 * 100) * 4;
-	buffer = (struct Vertex_Array*)malloc(total_buffer_size * sizeof(struct Vertex_Array));
+	//buffer = (struct Vertex_Array*)malloc(total_buffer_size * sizeof(struct Vertex_Array));
 	//Load_Menu(width, height, 2.0f);
-	index_buffer = make_indecies(get_size());
+	buffer.Initialize(total_buffer_size);
+	index_buffer.Make_Indecies(buffer.Get_Size());
 
+	renderer.Initialize(buffer, index_buffer, m_Camera);
+	renderer.Init_Transparent_Texture();
+
+	renderer.Get_Texture_Slot()[1] = LoadTexture("res/textures/factory_tile.png");
+	renderer.Get_Texture_Slot()[2] = LoadTexture("res/textures/main_menu.png");
+	renderer.Get_Texture_Slot()[3] = LoadTexture("res/textures/collectible.png");
+	renderer.Get_Texture_Slot()[4] = LoadTexture("res/textures/enemy.png");
+	renderer.Get_Texture_Slot()[5] = LoadTexture("res/textures/robot.png");
+	renderer.Get_Texture_Slot()[6] = LoadTexture("res/textures/factory_bg_6.png");
+	renderer.Get_Texture_Slot()[7] = LoadTexture("res/textures/robot_reversed.png");
+	renderer.Get_Texture_Slot()[8] = LoadTexture("res/textures/next_level_button.png");
+	renderer.Get_Texture_Slot()[9] = LoadTexture("res/textures/win_congrats_screen.png");
 	//load_level(buffer, level_path, width, height, character_scale);
 
-	handle_opengl();
+	//handle_opengl();
 	
-	Init_Transparent_Texture();
+	//Init_Transparent_Texture();
 	
-	texture_slot[1] = LoadTexture("res/textures/factory_tile.png");
+	/*texture_slot[1] = LoadTexture("res/textures/factory_tile.png");
 	texture_slot[2] = LoadTexture("res/textures/main_menu.png");
 	texture_slot[3] = LoadTexture("res/textures/collectible.png");
 	texture_slot[4] = LoadTexture("res/textures/enemy.png");
@@ -24,9 +37,9 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 	texture_slot[6] = LoadTexture("res/textures/factory_bg_6.png");
 	texture_slot[7] = LoadTexture("res/textures/robot_reversed.png");
 	texture_slot[8] = LoadTexture("res/textures/next_level_button.png");
-	texture_slot[9] = LoadTexture("res/textures/win_congrats_screen.png");
+	texture_slot[9] = LoadTexture("res/textures/win_congrats_screen.png");*/
 
-	std::cout << texture_slot[0] << ", " << texture_slot[1] << ", " << texture_slot[2] << "\n";
+	std::cout << renderer.Get_Texture_Slot()[0] << ", " << renderer.Get_Texture_Slot()[1] << ", " << renderer.Get_Texture_Slot()[2] << "\n";
 
 	//p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
 	//p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
@@ -48,31 +61,20 @@ void Game::Init_Transparent_Texture() {
 
 }
 
-Vertex_Array * Game::fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id) {
-	vertex[*index].position = new_position;
-	vertex[*index].color = new_color;
-	vertex[*index].tex_coord = new_tex_coord;
-	vertex[*index].tex_id = new_tex_id;
-	*index = *index + 1;
-	return vertex;
-}
-
 void Game::Load_Menu(float width, float height, float text_id) {
 
-	int index = 4;
+	buffer.Set_Size(4);
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
+	buffer.Fill_Buffer(glm::vec2(0.0f, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), text_id);
+	buffer.Fill_Buffer(glm::vec2(width, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), text_id);
+	buffer.Fill_Buffer(glm::vec2(width, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), text_id);
+	buffer.Fill_Buffer(glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), text_id);
 
-	buffer = fill_buffer(buffer, &index, new_position(0.0, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(text_id));
-	buffer = fill_buffer(buffer, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(text_id));
-	buffer = fill_buffer(buffer, &index, new_position(width, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(text_id));
-	buffer = fill_buffer(buffer, &index, new_position(0.0, 0.0), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(text_id));
-
-	set_size(index);
-
-	if (index_buffer != NULL) free(index_buffer);
-	index_buffer = make_indecies(get_size());
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+	index_buffer.Clean();
+	index_buffer.Make_Indecies(buffer.Get_Size());
+	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 
 }
 
@@ -81,9 +83,10 @@ void Game::Game_Over(float text_id) {
 	current_level = 0;
 	Load_Menu(945.0f, 540.0f, text_id);
 
-	if (index_buffer != NULL) free(index_buffer);
-	index_buffer = make_indecies(get_size());
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+	index_buffer.Clean();
+	index_buffer.Make_Indecies(buffer.Get_Size());
+	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 }
 
 
@@ -93,39 +96,38 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 	collectible_list.clear();
 	enemies_list.clear();
 
-	load_level(buffer, level_path, width, height, character_scale);
-	std::cout << "size: " << get_size() << ", total size: " << total_buffer_size << "\n";
+	load_level(buffer.Get_Buffer(), level_path, width, height, character_scale);
+	std::cout << "size: " << buffer.Get_Size() << ", total size: " << total_buffer_size << "\n";
 
-	if (index_buffer != NULL) free(index_buffer);
-	index_buffer = make_indecies(get_size());
+	index_buffer.Clean();
+	index_buffer.Make_Indecies(buffer.Get_Size());
+	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
 
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 
-	p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
-	p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
+	p1 = Player(renderer.Get_Texture_Slot()[0] - 1, buffer.Get_Buffer()[buffer.Get_Size() - 1].position, character_scale - 1);
+	p1.set_buffer_index(buffer.Get_Size() - 4, buffer.Get_Size() - 3, buffer.Get_Size() - 2, buffer.Get_Size() - 1);
 
 	current_level++;
 
 }
 
-Vertex_Array* Game::Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id) {
+void Game::Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id) {
 
-	int index = get_size();
-	int size = get_size();
+	int index = buffer.Get_Size();
+	int size = buffer.Get_Size();
 
-	buffer = fill_buffer(buffer, &index, tl, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(tex_id));
-	buffer = fill_buffer(buffer, &index, tr, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(tex_id));
-	buffer = fill_buffer(buffer, &index, br, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(tex_id));
-	buffer = fill_buffer(buffer, &index, bl, new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(tex_id));
-
-	return buffer;
+	buffer.Fill_Buffer(tl, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), tex_id);
+	buffer.Fill_Buffer(tr, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), tex_id);
+	buffer.Fill_Buffer(br, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), tex_id);
+	buffer.Fill_Buffer(bl, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), tex_id);
 
 }
 
 void Game::Change_Sprite_Scale(Player sp, float x)
 {
-	buffer[sp.get_buffer_index()[1]].position.x += x;
-	buffer[sp.get_buffer_index()[2]].position.x += x;
+	buffer.Get_Buffer()[sp.get_buffer_index()[1]].position.x += x;
+	buffer.Get_Buffer()[sp.get_buffer_index()[2]].position.x += x;
 }
 
 Game::~Game()
@@ -175,7 +177,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	std::vector<pos> p;
 	while ((c = fgetc(f)) != EOF) {
 		if (c == 'B') {
-			p.push_back({ i,j,0.0f });
+			p.push_back({ i,j,1.0f });
 		}
 		else if (c == 'G') {
 			p.push_back({ i,j,1.0f });
@@ -207,13 +209,13 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	}
 
 	//struct Vertex_Array *vertex = (struct Vertex_Array *)malloc(((p.size() + 1) * 4) * sizeof(struct Vertex_Array));
-	index = 0;
+	buffer.Reset();
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
-	vertex = fill_buffer(vertex, &index, new_position(0.0f, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(6.0f));
-	vertex = fill_buffer(vertex, &index, new_position(width, height), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(6.0f));
-	vertex = fill_buffer(vertex, &index, new_position(width, 0.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(6.0f));
-	vertex = fill_buffer(vertex, &index, new_position(0.0f, 0.0f), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(6.0f));
+	buffer.Fill_Buffer(glm::vec2(0.0f, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 6.0f);
+	buffer.Fill_Buffer(glm::vec2(width, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 6.0f);
+	buffer.Fill_Buffer(glm::vec2(width, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 6.0f);
+	buffer.Fill_Buffer(glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 6.0f);
 	
 	for (int k = 0; k < p.size(); k++) {
 
@@ -221,42 +223,39 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		/*std::cout << p.at(k).i << "," << p.at(k).j << "\n"; */
 		if (p.at(k).k == 3.0f) {
 
-			collectible_list.push_back(Player(3, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
+			collectible_list.push_back(Player(3, buffer.Get_Size(), glm::vec2(p.at(k).j* character_scale, p.at(k).i* character_scale)));
 		}
 		else if (p.at(k).k == 4.0f) {
 
-			enemies_list.push_back(Player(4, index, new_position(p.at(k).j* character_scale, p.at(k).i* character_scale)));
+			enemies_list.push_back(Player(4, buffer.Get_Size(), glm::vec2(p.at(k).j* character_scale, p.at(k).i* character_scale)));
 		}
 		else if (p.at(k).k == 8.0f) {
 
-			Next_Level = Player(8, index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale));
+			Next_Level = Player(8, buffer.Get_Size(), glm::vec2(p.at(k).j * character_scale, p.at(k).i * character_scale));
 		}
 
-		vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(p.at(k).k));
-		vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(p.at(k).k));
-		vertex = fill_buffer(vertex, &index, new_position((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(p.at(k).k));
-		vertex = fill_buffer(vertex, &index, new_position(p.at(k).j * character_scale, p.at(k).i * character_scale), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(p.at(k).k));
+		buffer.Fill_Buffer(glm::vec2(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), p.at(k).k);
+		buffer.Fill_Buffer(glm::vec2((p.at(k).j + 1) * character_scale, (p.at(k).i + 1) * character_scale), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), p.at(k).k);
+		buffer.Fill_Buffer(glm::vec2((p.at(k).j + 1) * character_scale, p.at(k).i * character_scale), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), p.at(k).k);
+		buffer.Fill_Buffer(glm::vec2(p.at(k).j* character_scale, p.at(k).i * character_scale), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), p.at(k).k);
 			
 		world[p.at(k).i * w + p.at(k).j].exist = true;
 	}
 
-	set_size(index);
-
 	for (int i = 0; i < custom_sprite_list.size(); i++) {
-		vertex = Make_Custom_Sprite(custom_sprite_list.at(i).get_custom_position_0(), custom_sprite_list.at(i).get_custom_position_1(),
+		Make_Custom_Sprite(custom_sprite_list.at(i).get_custom_position_0(), custom_sprite_list.at(i).get_custom_position_1(),
 									custom_sprite_list.at(i).get_custom_position_2(), custom_sprite_list.at(i).get_custom_position_3(), custom_sprite_list.at(i).get_texture_id());
 
-		custom_sprite_list.at(i).set_buffer_index(index, index + 1, index + 2, index + 3);
+		custom_sprite_list.at(i).set_buffer_index(buffer.Get_Size(), buffer.Get_Size() + 1, buffer.Get_Size() + 2, buffer.Get_Size() + 3);
 
-		index += 4;
 	}
 
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
 
-	vertex = fill_buffer(vertex, &index, new_position(p.at(s).j * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(5.0f));
-	vertex = fill_buffer(vertex, &index, new_position((p.at(s).j + 1) * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(5.0f));
-	vertex = fill_buffer(vertex, &index, new_position((p.at(s).j + 1) * character_scale - 1, p.at(s).i * character_scale - 1), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(5.0f));
-	vertex = fill_buffer(vertex, &index, new_position(p.at(s).j * character_scale - 1, p.at(s).i * character_scale - 1), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(5.0f));
+	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1, p.at(s).i * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1, p.at(s).i * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 5.0f);
 
 
 	//for (int k = 0; k < ((p.size() + 1)*4); k++) {
@@ -264,28 +263,6 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	//}
 
 	fclose(f);
-	set_size(index);
-}
-
-unsigned int *Game::make_indecies(int size)
-{
-	unsigned int* indecies = (unsigned int*)malloc((size / 4) * 6 * sizeof(unsigned int));
-	int index = 0, w = 0;
-	for (int k = 0; k < (size / 4) * 6; k += 6) {
-		indecies[index++] = 0 + w;
-		indecies[index++] = 3 + w;
-		indecies[index++] = 2 + w;
-		indecies[index++] = 2 + w;
-		indecies[index++] = 1 + w;
-		indecies[index++] = 0 + w;
-		w += 4;
-	}
-	/*
-	for (int k = 0; k < (size / 24) * 6; k++) {
-		std::cout << indecies[k] << "\n";
-	}
-	*/
-	return indecies;
 }
 
 void Game::set_window(GLFWwindow * win)
@@ -296,22 +273,6 @@ void Game::set_window(GLFWwindow * win)
 GLFWwindow * Game::get_window()
 {
 	return window;
-}
-
-void Game::set_size(unsigned int size) 
-{
-	buffer_size = size;
-}
-
-
-unsigned int Game::get_size()
-{
-	return buffer_size;
-}
-
-struct Vertex_Array * Game::get_buffer()
-{
-	return buffer;
 }
 
 void Game::set_player(Player p)
@@ -338,72 +299,70 @@ void Game::update()
 }
 
 
-
-
 void Game::update_buffer()
 {
 	if (p1.get_teleport())
 	{
-		buffer[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
-		buffer[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
+		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
 			   										  
-		buffer[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
-		buffer[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
 			   										  
-		buffer[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
-		buffer[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
+		buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
 			   										  
-		buffer[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
-		buffer[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
+		buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
+		buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
 
 		p1.set_teleport(false);
 	}
 	
-	buffer[p1.get_buffer_index()[0]].tex_id = p1.get_texture_id();
-	buffer[p1.get_buffer_index()[1]].tex_id = p1.get_texture_id();
-	buffer[p1.get_buffer_index()[2]].tex_id = p1.get_texture_id();
-	buffer[p1.get_buffer_index()[3]].tex_id = p1.get_texture_id();
+	buffer.Get_Buffer()[p1.get_buffer_index()[0]].tex_id = p1.get_texture_id();
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].tex_id = p1.get_texture_id();
+	buffer.Get_Buffer()[p1.get_buffer_index()[2]].tex_id = p1.get_texture_id();
+	buffer.Get_Buffer()[p1.get_buffer_index()[3]].tex_id = p1.get_texture_id();
 
 	if (Next_Level.get_texture_id() != -11) {
-		buffer[Next_Level.get_buffer_index()[0]].position.x = Next_Level.get_position().x;
-		buffer[Next_Level.get_buffer_index()[0]].position.y = Next_Level.get_position().y + tile_size;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[0]].position.x = Next_Level.get_position().x;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[0]].position.y = Next_Level.get_position().y + tile_size;
 
-		buffer[Next_Level.get_buffer_index()[1]].position.x = Next_Level.get_position().x + tile_size;
-		buffer[Next_Level.get_buffer_index()[1]].position.y = Next_Level.get_position().y + tile_size;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[1]].position.x = Next_Level.get_position().x + tile_size;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[1]].position.y = Next_Level.get_position().y + tile_size;
 		   									  
-		buffer[Next_Level.get_buffer_index()[2]].position.x = Next_Level.get_position().x + tile_size;
-		buffer[Next_Level.get_buffer_index()[2]].position.y = Next_Level.get_position().y;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[2]].position.x = Next_Level.get_position().x + tile_size;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[2]].position.y = Next_Level.get_position().y;
 		   									  
-		buffer[Next_Level.get_buffer_index()[3]].position.x = Next_Level.get_position().x;
-		buffer[Next_Level.get_buffer_index()[3]].position.y = Next_Level.get_position().y;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[3]].position.x = Next_Level.get_position().x;
+		buffer.Get_Buffer()[Next_Level.get_buffer_index()[3]].position.y = Next_Level.get_position().y;
 	}
 
 	for (int i = 0; i < enemies_list.size(); i++) {
-		buffer[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
-		buffer[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + tile_size;
 
-		buffer[enemies_list.at(i).get_buffer_index()[1]].position.x = enemies_list.at(i).get_position().x + tile_size;
-		buffer[enemies_list.at(i).get_buffer_index()[1]].position.y = enemies_list.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[1]].position.x = enemies_list.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[1]].position.y = enemies_list.at(i).get_position().y + tile_size;
 
-		buffer[enemies_list.at(i).get_buffer_index()[2]].position.x = enemies_list.at(i).get_position().x + tile_size;
-		buffer[enemies_list.at(i).get_buffer_index()[2]].position.y = enemies_list.at(i).get_position().y;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[2]].position.x = enemies_list.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[2]].position.y = enemies_list.at(i).get_position().y;
 
-		buffer[enemies_list.at(i).get_buffer_index()[3]].position.x = enemies_list.at(i).get_position().x;
-		buffer[enemies_list.at(i).get_buffer_index()[3]].position.y = enemies_list.at(i).get_position().y;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].position.x = enemies_list.at(i).get_position().x;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].position.y = enemies_list.at(i).get_position().y;
 	}
 
 	for (int i = 0; i < collectible_list.size(); i++) {
-		buffer[collectible_list.at(i).get_buffer_index()[0]].position.x = collectible_list.at(i).get_position().x;
-		buffer[collectible_list.at(i).get_buffer_index()[0]].position.y = collectible_list.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[0]].position.x = collectible_list.at(i).get_position().x;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[0]].position.y = collectible_list.at(i).get_position().y + tile_size;
 
-		buffer[collectible_list.at(i).get_buffer_index()[1]].position.x = collectible_list.at(i).get_position().x + tile_size;
-		buffer[collectible_list.at(i).get_buffer_index()[1]].position.y = collectible_list.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[1]].position.x = collectible_list.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[1]].position.y = collectible_list.at(i).get_position().y + tile_size;
 
-		buffer[collectible_list.at(i).get_buffer_index()[2]].position.x = collectible_list.at(i).get_position().x + tile_size;
-		buffer[collectible_list.at(i).get_buffer_index()[2]].position.y = collectible_list.at(i).get_position().y;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[2]].position.x = collectible_list.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[2]].position.y = collectible_list.at(i).get_position().y;
 
-		buffer[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
-		buffer[collectible_list.at(i).get_buffer_index()[3]].position.y = collectible_list.at(i).get_position().y;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
+		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[3]].position.y = collectible_list.at(i).get_position().y;
 	}
 	
 	/*for (int i = 0; i < custom_sprite_list.size(); i++) {
@@ -439,7 +398,7 @@ void Game::render()
 
 	/* set dynamic vertex buffer */
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb));
-	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, get_size() * sizeof(Vertex_Array), buffer));
+	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, buffer.Get_Size() * sizeof(Vertex_Array), buffer.Get_Buffer()));
 
 	/* Render here */
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -455,7 +414,7 @@ void Game::render()
 	GLCall(glBindTextureUnit(8, texture_slot[8]));
 	GLCall(glBindTextureUnit(9, texture_slot[9]));
 
-	GLCall(glDrawElements(GL_TRIANGLES, (get_size() / 4) * 6, GL_UNSIGNED_INT, NULL));
+	GLCall(glDrawElements(GL_TRIANGLES, (buffer.Get_Size() / 4) * 6, GL_UNSIGNED_INT, NULL));
 }
 
 void Game::clean()
@@ -503,7 +462,7 @@ void Game::handle_opengl()
 	/* index buffer */
 	GLCall(glGenBuffers(1, &ib));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 
 	/* shaders */
 	ShaderProgramSource shaderSource = ParseShader("res/shaders/Basic.shader");
@@ -532,16 +491,16 @@ void Game::handle_opengl()
 
 void Game::update_player_position(float amount_x, float amount_y)
 {
-	//p1.change_position(glm::vec2(amount_x, amount_y));
+	p1.change_position(glm::vec2(amount_x, amount_y));
 
-	buffer[p1.get_buffer_index()[0]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[0]].position.y += amount_y;
-	buffer[p1.get_buffer_index()[1]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[1]].position.y += amount_y;
-	buffer[p1.get_buffer_index()[2]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[2]].position.y += amount_y;
-	buffer[p1.get_buffer_index()[3]].position.x += amount_x;
-	buffer[p1.get_buffer_index()[3]].position.y += amount_y;
+	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x += amount_x;
+	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y += amount_y;
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x += amount_x;
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y += amount_y;
+	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x += amount_x;
+	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.y += amount_y;
+	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.x += amount_x;
+	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.y += amount_y;
 
 }
 
@@ -549,20 +508,20 @@ void Game::update_player_position(float amount_x, float amount_y)
 void Game::update_player_position_x()
 {
 
-	buffer[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
-	buffer[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
-	buffer[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
-	buffer[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
+	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
+	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
 
 }
 
 void Game::update_player_position_y()
 {
 
-	buffer[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
-	buffer[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
-	buffer[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
-	buffer[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
+	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
+	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
 
 }
 
@@ -574,13 +533,13 @@ void Game::handle_collision(float scale_h, float scale_v, float amount_x, float 
 
 	/* check if there is collision on x-axis */
 	/* NOTE: in line 577 and 583 the size was size_without_shows and i changed it to get_size() */
-	buffer = check_for_collitions(buffer, &p1, get_size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS);
+	buffer.Set_Buffer(check_for_collitions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), scale_h, &Is_Grounded_x, &Collides_x, X_AXIS));
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(0.0f, amount_y);
 
 	/* check if there is collision on y-axis */
-	buffer = check_for_collitions(buffer, &p1, get_size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS);
+	buffer.Set_Buffer(check_for_collitions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS));
 
 	p1.set_teleport(false);
 }
@@ -1201,134 +1160,134 @@ bool Game::is_Edge_Connected(float x1, float y1, float x2, float y2) {
 
 void Game::Init_Shadows()
 {
-	shadow_quad_list.clear();
-	int index = get_size();
-	/* NOTE: put this size in collision detecting function to work properly */
-	size_without_shadows = get_size();
+	//shadow_quad_list.clear();
+	//int index = get_size();
+	///* NOTE: put this size in collision detecting function to work properly */
+	//size_without_shadows = get_size();
 
-	int k = 0, l = 0;
-	for (int i = 0; i < angles.size(); i++) {
-		if (angles.at(i) >= 2.0f) {
+	//int k = 0, l = 0;
+	//for (int i = 0; i < angles.size(); i++) {
+	//	if (angles.at(i) >= 2.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), k, l));
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), k, l));
 
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-			}
-		}
-		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
+	//		}
+	//	}
+	//	else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
 
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-			}
-		}
-		else if (angles.at(i) <= -2.0f) {
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
+	//		}
+	//	}
+	//	else if (angles.at(i) <= -2.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), k, l));
 
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-			}
-		}
-		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
+	//		}
+	//	}
+	//	else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1)%angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
-				shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), k, l));
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1)%angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			shadow_quad_list.push_back(Player(0, index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), k, l));
 
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-				buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
-			}
-		}
-	}
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).sx, endingEdges.at(l).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).sx, endingEdges.at(k).sy), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(k).ex, endingEdges.at(k).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
+	//			buffer = fill_buffer(buffer, &index, new_position(endingEdges.at(l).ex, endingEdges.at(l).ey), new_color(1.0f, 1.0f, 1.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
+	//		}
+	//	}
+	//}
 
 
-	set_size(index);
-	//std::cout << "Size : " << get_size() << "\n\n";
+	//set_size(index);
+	////std::cout << "Size : " << get_size() << "\n\n";
 
-	if (index_buffer != NULL) free(index_buffer);
-	index_buffer = make_indecies(get_size());
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+	//if (index_buffer != NULL) free(index_buffer);
+	//index_buffer = make_indecies(get_size());
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
 
 }
 
 void Game::Calculate_Shadows0() {
 
-	int k = 0, l = 0;
-	for (int i = 0; i < angles.size(); i++) {
+	//int k = 0, l = 0;
+	//for (int i = 0; i < angles.size(); i++) {
 
-		if (angles.at(i) >= 2.0f) {
+	//	if (angles.at(i) >= 2.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if(true){
-				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-			}
-		}
-		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (true) {
-				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-			}
-		}
-		else if (angles.at(i) <= -2.0f) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if(true){
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//		}
+	//	}
+	//	else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (true) {
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//		}
+	//	}
+	//	else if (angles.at(i) <= -2.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (true) {
-				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-			}
-		}
-		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (true) {
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//		}
+	//	}
+	//	else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (true) {
-				buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (true) {
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[0]].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[1]].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[2]].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[shadow_quad_list.at(i).get_buffer_index()[3]].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
 
-			}
-		}
-	}
+	//		}
+	//	}
+	//}
 
 }
 
@@ -1336,132 +1295,101 @@ void Game::Calculate_Shadows1() {
 
 	//std::cout << "Size : " << get_size() << "\n\n";
 	//is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy);
-	int index = size_without_shadows;
-	int k = 0, l = 0;
+	//int index = size_without_shadows;
+	//int k = 0, l = 0;
 
-	for (int i = 0; i < angles.size(); i++) {
-		if (angles.at(i) >= 2.0f) {
+	//for (int i = 0; i < angles.size(); i++) {
+	//	if (angles.at(i) >= 2.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-			}
-		}
-		else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//		}
+	//	}
+	//	else if (angles.at(i) <= 2.0f && angles.at(i) >= 0.0f) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 
-				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-			}
-		}
-		else if (angles.at(i) <= -2.0f) {
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//		}
+	//	}
+	//	else if (angles.at(i) <= -2.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 
-				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-			}
-		}
-		else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//		}
+	//	}
+	//	else if (angles.at(i) >= -2.0f && angles.at(i) <= 0.0f) {
 
-			k = find_edge(endingEdges, angles.at(i));
-			l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
-			//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
-			if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
+	//		k = find_edge(endingEdges, angles.at(i));
+	//		l = find_edge(endingEdges, angles.at((i + 1) % angles.size()));
+	//		//if (is_Edge_Connected(endingEdges.at(k).sx, endingEdges.at(k).sy, endingEdges.at(l).sx, endingEdges.at(l).sy)) {
+	//		if (endingEdges.at(k).is_external == false || endingEdges.at(l).is_external == false) {
 
-				buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
-				buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
-				buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
-				buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
-			}
-		}
-	}
+	//			buffer[index++].position = new_position(endingEdges.at(l).sx, endingEdges.at(l).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(k).sx, endingEdges.at(k).sy);
+	//			buffer[index++].position = new_position(endingEdges.at(k).ex, endingEdges.at(k).ey);
+	//			buffer[index++].position = new_position(endingEdges.at(l).ex, endingEdges.at(l).ey);
+	//		}
+	//	}
+	//}
 
 
 }
 
 void Game::Init_Shadow_points()
 {
-	shadow_quad_list.clear();
-	int index = get_size();
-	size_without_shadows = get_size();
+	//shadow_quad_list.clear();
+	//int index = get_size();
+	//size_without_shadows = get_size();
 
-	for (auto& e : endingEdges) {
+	//for (auto& e : endingEdges) {
 
-		buffer = fill_buffer(buffer, &index, new_position(e.sx, e.sy + 2.0f), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(e.sx + 2.0f, e.sy + 2.0f), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(e.sx + 2.0f, e.sy), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
-		buffer = fill_buffer(buffer, &index, new_position(e.sx, e.sy), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
+	//	buffer = fill_buffer(buffer, &index, new_position(e.sx, e.sy + 2.0f), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(0.0f, 1.0f), new_tex_id(0.0f));
+	//	buffer = fill_buffer(buffer, &index, new_position(e.sx + 2.0f, e.sy + 2.0f), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(1.0f, 1.0f), new_tex_id(0.0f));
+	//	buffer = fill_buffer(buffer, &index, new_position(e.sx + 2.0f, e.sy), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(1.0f, 0.0f), new_tex_id(0.0f));
+	//	buffer = fill_buffer(buffer, &index, new_position(e.sx, e.sy), new_color(1.0f, 0.0f, 0.0f, 1.0f), new_tex_coord(0.0f, 0.0f), new_tex_id(0.0f));
 
-	}
+	//}
 
-	set_size(index);
-	//std::cout << "Size : " << get_size() << "\n\n";
+	//set_size(index);
+	////std::cout << "Size : " << get_size() << "\n\n";
 
-	if (index_buffer != NULL) free(index_buffer);
-	index_buffer = make_indecies(get_size());
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
+	//if (index_buffer != NULL) free(index_buffer);
+	//index_buffer = make_indecies(get_size());
+	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (get_size() / 4) * 6 * sizeof(unsigned int), index_buffer, GL_STATIC_DRAW));
 
 }
 
 void Game::Calculate_Shadow_points()
 {
-	int index = size_without_shadows;
+	//int index = size_without_shadows;
 
-	for (auto& e : endingEdges) {
+	//for (auto& e : endingEdges) {
 
-		buffer[index++].position = new_position(e.sx, e.sy + 2.0f);
-		buffer[index++].position = new_position(e.sx + 2.0f, e.sy + 2.0f);
-		buffer[index++].position = new_position(e.sx + 2.0f, e.sy);
-		buffer[index++].position = new_position(e.sx, e.sy);
+	//	buffer[index++].position = new_position(e.sx, e.sy + 2.0f);
+	//	buffer[index++].position = new_position(e.sx + 2.0f, e.sy + 2.0f);
+	//	buffer[index++].position = new_position(e.sx + 2.0f, e.sy);
+	//	buffer[index++].position = new_position(e.sx, e.sy);
 
-	}
+	//}
 
-}
-
-glm::vec2 Game::new_position(float width, float height)
-{
-	glm::vec2 pos;
-	pos.x = width;
-	pos.y = height;
-	return pos;
-}
-
-glm::vec4 Game::new_color(float r, float g, float b, float a)
-{
-	glm::vec4 col;
-	col.r = r;
-	col.g = g;
-	col.b = b;
-	col.a = a;
-	return col;
-}
-
-glm::vec2 Game::new_tex_coord(float x, float y)
-{
-	glm::vec2 tex_coord;
-	tex_coord.x = x;
-	tex_coord.y = y;
-	return tex_coord;
-}
-
-float Game::new_tex_id(float id)
-{
-	return id;
 }

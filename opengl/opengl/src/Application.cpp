@@ -82,7 +82,8 @@ int main(void)
 		}
 		
 		// - Render at maximum possible frames
-		game.render();
+		game.renderer.Render(game.buffer, game.m_Camera);
+		//game.render();
 		frames++;
 
 		// - Reset after one second
@@ -99,7 +100,8 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	game.clean();
+	game.renderer.Clear();
+	//game.clean();
 
 	glfwTerminate();
 	return 0;

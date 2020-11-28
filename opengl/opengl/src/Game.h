@@ -4,15 +4,22 @@
 #include "Enemies.h"
 #include "Shader.h"
 #include "Collision_Detection.h"
-#include<vector>
+#include <vector>
 #include "Orthographic_Camera.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "Vertex_Buffer.h"
+#include "Index_Buffer.h"
+#include "Renderer2D.h"
 
 
 
 class Game {
 public:
-	struct Vertex_Array * buffer;
+
+	Vertex_Buffer buffer;
+	Index_Buffer index_buffer;
+	Renderer2D renderer;
+	Orthographic_Camera m_Camera;
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
 	std::vector<Player> custom_sprite_list;
@@ -21,7 +28,6 @@ public:
 	float tile_size;
 
 protected:
-	Orthographic_Camera m_Camera;
 	unsigned int texture_slot[32];
 	Player p1;
 
@@ -32,7 +38,8 @@ protected:
 	bool Collides_y = false;
 
 	float refresh_rate;
-	int current_level;
+	int current_level = 0;
+	bool collision = true;
 
 private:
 	GLFWwindow * window;
@@ -53,7 +60,6 @@ private:
 
 	unsigned int buffer_size;
 	unsigned int total_buffer_size;
-	unsigned int * index_buffer;
 	unsigned int white_texture_id;
 	unsigned int size_without_shadows = 0;
 
@@ -64,19 +70,14 @@ public:
 	void load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
 	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
-	unsigned int *make_indecies(int size);
 	
-	Vertex_Array* Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id);
+	void Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id);
 	void Change_Sprite_Scale(Player sp, float x);
 
 	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);
 
 	void set_window(GLFWwindow *win);
 	GLFWwindow *get_window();
-
-	void set_size(unsigned int size);
-	unsigned int get_size();
-	struct Vertex_Array *get_buffer();
 
 	std::vector<int> l;
 
@@ -110,21 +111,6 @@ public:
 protected:
 	void Update_Camera_Uniform();
 	void handle_opengl();
-	Vertex_Array * fill_buffer(Vertex_Array *vertex, int *index, glm::vec2 new_position, glm::vec4 new_color, glm::vec2 new_tex_coord, float new_tex_id);
-
-	glm::vec2 new_position(float width, float height);
-	glm::vec4 new_color(float r, float g, float b, float a);
-	glm::vec2 new_tex_coord(float x, float y);
-	float new_tex_id(float id);
-
-	void set_vao(unsigned int);
-	void get_vao(unsigned int);
-	void set_vb(unsigned int);
-	void get_vb(unsigned int);
-	void set_ib(unsigned int);
-	void get_ib(unsigned int);
-	void set_shader(unsigned int);
-	void get_shader(unsigned int);
 };
 
 

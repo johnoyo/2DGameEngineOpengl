@@ -98,10 +98,10 @@ struct Vertex_Array* check_for_collitions(struct Vertex_Array* vertex, Player *p
 		if (tmp != NULL) { *is_grounded = true; return tmp; }
 
 		tmp = check_corner_tr_bl(p, vertex, size, player_scale, vertex[p->get_buffer_index()[1]].position.x, vertex[p->get_buffer_index()[1]].position.y, vertex[i + 3].position.x, vertex[i + 3].position.y, vertex[i + 1].position.x, vertex[i + 1].position.y, axis);
-		if (tmp != NULL) return tmp;
+		if (tmp != NULL) { return tmp; }
 
 		tmp = check_corner_tl_br(p, vertex, size, player_scale, vertex[p->get_buffer_index()[0]].position.x, vertex[p->get_buffer_index()[0]].position.y, vertex[i + 2].position.x, vertex[i + 2].position.y, vertex[i + 0].position.x, vertex[i + 0].position.y, axis);
-		if (tmp != NULL) return tmp;
+		if (tmp != NULL) { return tmp; }
 
 		tmp = check_corner_bl_tr(p, vertex, size, player_scale, vertex[p->get_buffer_index()[3]].position.x, vertex[p->get_buffer_index()[3]].position.y, vertex[i + 1].position.x, vertex[i + 1].position.y, vertex[i + 3].position.x, vertex[i + 3].position.y, axis);
 		if (tmp != NULL) { *is_grounded = true; return tmp; }
