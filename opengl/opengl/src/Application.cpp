@@ -10,6 +10,12 @@
 #include "Game.h"
 #include "Game_Instance.h"
 
+//void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+//{
+//	if (key == GLFW_KEY_E && action == GLFW_PRESS)
+//		std::cout << key << std::endl;
+//}
+
 int main(void)
 {
 
@@ -37,6 +43,8 @@ int main(void)
 
 	
 #endif	
+
+	//glfwSetKeyCallback(window, key_callback);
 	if (!window)
 	{
 		glfwTerminate();
@@ -100,8 +108,7 @@ int main(void)
 		glfwPollEvents();
 	}
 
-	game.renderer.Clear();
-	//game.clean();
+	game.clean();
 
 	glfwTerminate();
 	return 0;

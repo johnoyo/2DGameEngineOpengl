@@ -33,12 +33,23 @@ public:
 
 	void init() override {
 
-		//Load_Menu(945.0f, 540.0f, 2.0f);
-		std::string level1 = "res/levels/test1.txt";
-		Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
-		m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 
-		p1.set_texture_id(5);
+		texture_manager.Load_Texture(renderer, "res/textures/factory_tile.png");
+		texture_manager.Load_Texture(renderer, "res/textures/main_menu.png");
+		texture_manager.Load_Texture(renderer, "res/textures/collectible.png");
+		texture_manager.Load_Texture(renderer, "res/textures/enemy.png");
+		texture_manager.Load_Texture(renderer, "res/textures/robot.png");
+		texture_manager.Load_Texture(renderer, "res/textures/factory_bg_6.png");
+		texture_manager.Load_Texture(renderer, "res/textures/robot_reversed.png");
+		texture_manager.Load_Texture(renderer, "res/textures/next_level_button.png");
+		texture_manager.Load_Texture(renderer, "res/textures/win_congrats_screen.png");
+
+		Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu.png"));
+		
+
+		p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
+
+		SoundEngine->play2D("res/audio/breakout.mp3", true);
 		//m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 		
 	}
@@ -46,18 +57,21 @@ public:
 	void update() override {
 
 		if (current_level == 0) {
-			if (glfwGetKey(get_window(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
-			else if (glfwGetKey(get_window(), GLFW_KEY_SPACE) == GLFW_PRESS) {
-				std::string level2 = "res/levels/test2.txt";
-
-				Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
+			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
+				std::string level1 = "res/levels/test1.txt";
+				Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
 				m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
-
 			}
 		}
 		else
 		{
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_E)) {
+				std::cout << "Pressed" << GLFW_KEY_E << std::endl;
+				SoundEngine->play2D("res/audio/bleep.mp3");
+			}
+
 			if (Is_Grounded_y) {
 				if (scale_h < 0) {
 					if (amount_x > 0) amount_x -= 0.5f;
@@ -81,8 +95,8 @@ public:
 			if (amount_y > 0) scale_v = -26.0f;
 			else scale_v = 26.0f;
 
-			if (scale_h > 0) p1.set_texture_id(7);
-			else  p1.set_texture_id(5);
+			if (scale_h > 0) p1.set_texture_id(texture_manager.Find("res/textures/robot_reversed.png"));
+			else  p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
 
 			if (amount_x > 5.0f) amount_x = 5.0f;
 			if (amount_x < -5.0f) amount_x = -5.0f;
@@ -91,6 +105,7 @@ public:
 			//m_Camera.Incr_Position({ 0.0f, amount_y, 0.0f });
 			//m_Camera.Incr_Position({ amount_x, 0.0f, 0.0f });
 			m_Camera.Set_Position_x(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f));
+			Background.fix_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 0.0f }));
 
 			//if (m_Camera.Get_Position().x < (-945.0f / 2.0f)) m_Camera.Set_Position_x(-945.0f / 2.0f);
 			//if (m_Camera.Get_Position().x > (945.0f / 2.0f)) m_Camera.Set_Position_x(945.0f / 2.0f);

@@ -10,6 +10,10 @@
 #include "Vertex_Buffer.h"
 #include "Index_Buffer.h"
 #include "Renderer2D.h"
+#include "Texture_Manager.h"
+#include "Input_Manager.h"
+#include <irrKlang.h>
+//#pragma comment(lib, "irrKlang.lib")
 
 
 
@@ -19,14 +23,19 @@ public:
 	Vertex_Buffer buffer;
 	Index_Buffer index_buffer;
 	Renderer2D renderer;
+	Texture_Manager texture_manager;
+	Input_Manager input_manager;
 	Orthographic_Camera m_Camera;
+	irrklang::ISoundEngine* SoundEngine;
+
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
 	std::vector<Player> custom_sprite_list;
 	std::vector<Player> shadow_quad_list;
-	Player Next_Level = Player(-11, 0);
-	float tile_size;
 
+	Player Next_Level = Player(-11, 0);
+	Player Background = Player(-11, 0);
+	float tile_size;
 protected:
 	unsigned int texture_slot[32];
 	Player p1;

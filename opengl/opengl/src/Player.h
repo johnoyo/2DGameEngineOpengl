@@ -14,8 +14,7 @@ private:
 	glm::vec2 custom_position_1;
 	glm::vec2 custom_position_2;
 	glm::vec2 custom_position_3;
-	int k_pos;
-	int l_pos;
+
 public:
 	Player();
 	Player(unsigned int texture_id, glm::vec2 pos, float scale);
@@ -39,11 +38,10 @@ public:
 
 	void set_teleport(bool tel);
 	bool get_teleport();
+	float scale_h;
+	float scale_v;
 
 	void despawn();
-
-	int get_k_pos();
-	int get_l_pos();
 
 	glm::vec2 get_custom_position_0();
 	glm::vec2 get_custom_position_1();

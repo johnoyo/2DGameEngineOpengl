@@ -11,7 +11,6 @@ public:
 	void Render(Vertex_Buffer buffer, Orthographic_Camera m_Camera);
 	void Clear();
 	void Upadte_Index_Buffer(unsigned int size, Index_Buffer index_buffer);
-	void Init_Transparent_Texture();
 	unsigned int *Get_Texture_Slot();
 
 private:

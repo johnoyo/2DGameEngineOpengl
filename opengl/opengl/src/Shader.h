@@ -26,5 +26,3 @@ unsigned int CompileShader(unsigned int type, const std::string& source);
  * @fragmentShader: the string which contains the fragment shader code
  */
 unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
-
-unsigned int LoadTexture(const std::string& path);

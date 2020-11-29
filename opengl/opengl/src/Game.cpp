@@ -1,50 +1,40 @@
 #include "Game.h"
 
+//void Game::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+//{
+//	if (key == GLFW_KEY_E && action == GLFW_PRESS) std::cout << key << std::endl;
+//		SoundEngine->play2D("res/audio/beep.mp3", true);
+//}
+
+
 Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) 
 	: window(win), refresh_rate(refresh_rate), tile_size(character_scale), m_Camera(0.0f, width, 0.0f, height)
-
 {
+
+	/* Init sound Engine */
+	SoundEngine = irrklang::createIrrKlangDevice();
+	if (!SoundEngine)
+	{
+		std::cout << "Error: Could not create Sound Engine" << std::endl;
+	}
+	/*glfwSetKeyCallback(get_window(), f);*/
+
 	/* TODO: make this better */
 	total_buffer_size = (100 * 100) * 4;
-	//buffer = (struct Vertex_Array*)malloc(total_buffer_size * sizeof(struct Vertex_Array));
-	//Load_Menu(width, height, 2.0f);
+
 	buffer.Initialize(total_buffer_size);
 	index_buffer.Make_Indecies(buffer.Get_Size());
 
 	renderer.Initialize(buffer, index_buffer, m_Camera);
-	renderer.Init_Transparent_Texture();
+	texture_manager.Init_Transparent_Texture(renderer);
 
-	renderer.Get_Texture_Slot()[1] = LoadTexture("res/textures/factory_tile.png");
-	renderer.Get_Texture_Slot()[2] = LoadTexture("res/textures/main_menu.png");
-	renderer.Get_Texture_Slot()[3] = LoadTexture("res/textures/collectible.png");
-	renderer.Get_Texture_Slot()[4] = LoadTexture("res/textures/enemy.png");
-	renderer.Get_Texture_Slot()[5] = LoadTexture("res/textures/robot.png");
-	renderer.Get_Texture_Slot()[6] = LoadTexture("res/textures/factory_bg_6.png");
-	renderer.Get_Texture_Slot()[7] = LoadTexture("res/textures/robot_reversed.png");
-	renderer.Get_Texture_Slot()[8] = LoadTexture("res/textures/next_level_button.png");
-	renderer.Get_Texture_Slot()[9] = LoadTexture("res/textures/win_congrats_screen.png");
-	//load_level(buffer, level_path, width, height, character_scale);
-
-	//handle_opengl();
 	
-	//Init_Transparent_Texture();
-	
-	/*texture_slot[1] = LoadTexture("res/textures/factory_tile.png");
-	texture_slot[2] = LoadTexture("res/textures/main_menu.png");
-	texture_slot[3] = LoadTexture("res/textures/collectible.png");
-	texture_slot[4] = LoadTexture("res/textures/enemy.png");
-	texture_slot[5] = LoadTexture("res/textures/robot.png");
-	texture_slot[6] = LoadTexture("res/textures/factory_bg_6.png");
-	texture_slot[7] = LoadTexture("res/textures/robot_reversed.png");
-	texture_slot[8] = LoadTexture("res/textures/next_level_button.png");
-	texture_slot[9] = LoadTexture("res/textures/win_congrats_screen.png");*/
 
 	std::cout << renderer.Get_Texture_Slot()[0] << ", " << renderer.Get_Texture_Slot()[1] << ", " << renderer.Get_Texture_Slot()[2] << "\n";
 
-	//p1 = Player(texture_slot[0] - 1, buffer[get_size() - 1].position, character_scale - 1);
-	//p1.set_buffer_index(get_size() - 4, get_size() - 3, get_size() - 2, get_size() - 1);
-	//std::cout << p1.get_position().x << ", " << p1.get_position().y << "\n";
 }
+
+
 
 void Game::Init_Transparent_Texture() {
 
@@ -212,10 +202,12 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	buffer.Reset();
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
+	Background = Player(6.0f, buffer.Get_Size(), glm::vec2(0.0f, 0.0f));
 	buffer.Fill_Buffer(glm::vec2(0.0f, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 6.0f);
 	buffer.Fill_Buffer(glm::vec2(width, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 6.0f);
 	buffer.Fill_Buffer(glm::vec2(width, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 6.0f);
 	buffer.Fill_Buffer(glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 6.0f);
+
 	
 	for (int k = 0; k < p.size(); k++) {
 
@@ -337,6 +329,20 @@ void Game::update_buffer()
 		buffer.Get_Buffer()[Next_Level.get_buffer_index()[3]].position.y = Next_Level.get_position().y;
 	}
 
+	if (Background.get_texture_id() != -11) {
+		buffer.Get_Buffer()[Background.get_buffer_index()[0]].position.x = Background.get_position().x;
+		buffer.Get_Buffer()[Background.get_buffer_index()[0]].position.y = Background.get_position().y + 540.0f;
+
+		buffer.Get_Buffer()[Background.get_buffer_index()[1]].position.x = Background.get_position().x + 945.0f;
+		buffer.Get_Buffer()[Background.get_buffer_index()[1]].position.y = Background.get_position().y + 540.0f;
+
+		buffer.Get_Buffer()[Background.get_buffer_index()[2]].position.x = Background.get_position().x + 945.0f;
+		buffer.Get_Buffer()[Background.get_buffer_index()[2]].position.y = Background.get_position().y;
+
+		buffer.Get_Buffer()[Background.get_buffer_index()[3]].position.x = Background.get_position().x;
+		buffer.Get_Buffer()[Background.get_buffer_index()[3]].position.y = Background.get_position().y;
+	}
+
 	for (int i = 0; i < enemies_list.size(); i++) {
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + tile_size;
@@ -419,12 +425,11 @@ void Game::render()
 
 void Game::clean()
 {
-	GLCall(glDeleteBuffers(1, &vb));
-	GLCall(glDeleteBuffers(1, &ib));
-	GLCall(glDeleteProgram(shader));
-	GLCall(glDeleteVertexArrays(1, &vao));
-
-	GLCall(glDeleteTextures(10, texture_slot));
+	std::cout << "Cleaning..." << std::endl;
+	renderer.Clear();
+	if (buffer.Get_Buffer() != NULL) free(buffer.Get_Buffer());
+	if (index_buffer.Get_Index_Buffer() != NULL) free(index_buffer.Get_Index_Buffer());
+	if (world != NULL) free(world);
 }
 
 
