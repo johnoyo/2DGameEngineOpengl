@@ -115,10 +115,6 @@ public:
 		}
 		else
 		{
-			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_W)) {
-				std::cout << "Pressed" << GLFW_KEY_W << std::endl;
-				SoundEngine->play2D("res/audio/bleep.mp3");
-			}
 
 			if (Is_Grounded_y) {
 				if (scale_h < 0) {
@@ -167,6 +163,10 @@ public:
 
 			//if (scale_h > 0) p1.set_texture_id(texture_manager.Find("res/textures/robot_reversed.png"));
 			//else p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
+			if (input_manager.GetKeyRelease(get_window(), GLFW_KEY_A)) p1.set_texture_id(texture_manager.Find("res/textures/robot_reversed.png"));
+
+			if (input_manager.GetKeyRelease(get_window(), GLFW_KEY_D)) p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
+			
 			
 
 			if (amount_x > 5.0f) amount_x = 5.0f;
@@ -198,14 +198,17 @@ public:
 
 			}
 
-			Repeat_Every(1.0, previous_time1, 
+			Repeat_Every(0.5, previous_time1, 
 				[&](void) {
-					std::cout << "This is a message!\n";
-					if (input_manager.GetKeyDown(get_window(), GLFW_KEY_F, GLFW_PRESS)) {
+					//std::cout << "This is a message!\n";
+					if (input_manager.GetKeyDown(get_window(), GLFW_KEY_A, GLFW_PRESS)) {
 						if(p1.get_texture_id() == texture_manager.Find("res/textures/robot.png")) p1.set_texture_id(texture_manager.Find("res/textures/robot_reversed.png"));
 						else if (p1.get_texture_id() == texture_manager.Find("res/textures/robot_reversed.png"))p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
 					}
-					//SoundEngine->play2D("res/audio/bleep.mp3");
+					if (input_manager.GetKeyDown(get_window(), GLFW_KEY_D, GLFW_PRESS)) {
+						if (p1.get_texture_id() == texture_manager.Find("res/textures/robot.png")) p1.set_texture_id(texture_manager.Find("res/textures/robot_reversed.png"));
+						else if (p1.get_texture_id() == texture_manager.Find("res/textures/robot_reversed.png"))p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
+					}
 				});
 
 			//std::cout << "Camera pos: " << m_Camera.Get_Position().x << ", " << m_Camera.Get_Position().y << "\n";
