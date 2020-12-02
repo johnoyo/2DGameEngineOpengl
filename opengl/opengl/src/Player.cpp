@@ -22,10 +22,11 @@ Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, int i
 	set_buffer_index(index, index + 1, index + 2, index + 3);
 }
 
-Player::Player(unsigned int texture_id, glm::vec2 custom_position_0, glm::vec2 custom_position_1, glm::vec2 custom_position_2, glm::vec2 custom_position_3)
-	: texture_id(texture_id), position(custom_position_3), custom_position_0(custom_position_0),
+Player::Player(unsigned int texture_id, glm::vec4 c, glm::vec2 custom_position_0, glm::vec2 custom_position_1, glm::vec2 custom_position_2, glm::vec2 custom_position_3)
+	: texture_id(texture_id), color(c), position(custom_position_3), custom_position_0(custom_position_0),
 	  custom_position_1(custom_position_1), custom_position_2(custom_position_2), custom_position_3(custom_position_3)
 {
+	position = custom_position_3;
 	health = 100.0f;
 }
 
@@ -43,8 +44,8 @@ void Player::change_position(glm::vec2 new_pos)
 {
 	position.x += new_pos.x;
 	position.y += new_pos.y;
-	scale_h = new_pos.x;
-	scale_v = new_pos.y;
+	amount_h = new_pos.x;
+	amount_v = new_pos.y;
 }
 
 
@@ -55,9 +56,25 @@ void Player::fix_position(glm::vec2 new_pos)
 	teleport = true;
 }
 
+void Player::set_custom_position(glm::vec2 position, float width, float height, float offset)
+{
+	custom_position_0 = { position.x + offset, position.y };
+	custom_position_1 = { position.x + width,  position.y };
+	custom_position_2 = { position.x + width,  position.y + height };
+	custom_position_3 = { position.x + offset, position.y + height };
+}
+
 void Player::respawn(glm::vec2 new_pos)
 {
 	position = new_pos;
+}
+
+void Player::despawn_custom_sprite()
+{
+	custom_position_0 = glm::vec2(0.0f, 0.0f);
+	custom_position_1 = glm::vec2(0.0f, 0.0f);
+	custom_position_2 = glm::vec2(0.0f, 0.0f);
+	custom_position_3 = glm::vec2(0.0f, 0.0f);
 }
 
 glm::vec2 Player::get_position()

@@ -10,21 +10,23 @@ private:
 	unsigned int texture_id;
 	unsigned int buffer_index[4];
 	bool teleport = false;
+
+public:
+	glm::vec4 color;
 	glm::vec2 custom_position_0;
 	glm::vec2 custom_position_1;
 	glm::vec2 custom_position_2;
 	glm::vec2 custom_position_3;
-
-public:
 	Player();
 	Player(unsigned int texture_id, glm::vec2 pos, float scale);
 	Player(unsigned int texture_id, unsigned int index);
 	Player(unsigned int texture_id, unsigned int index, glm::vec2 pos);
 	Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, int i, int j);
-	Player(unsigned int texture_id, glm::vec2 custom_position_0, glm::vec2 custom_position_1, glm::vec2 custom_position_2, glm::vec2 custom_position_3);
+	Player(unsigned int texture_id, glm::vec4 c, glm::vec2 custom_position_0, glm::vec2 custom_position_1, glm::vec2 custom_position_2, glm::vec2 custom_position_3);
 	~Player();
 	void change_position(glm::vec2 new_pos);
 	void fix_position(glm::vec2 new_pos);
+	void set_custom_position(glm::vec2 position, float width, float height, float offset);
 	void respawn(glm::vec2 new_pos);
 	glm::vec2 get_position();
 	float get_health();
@@ -38,10 +40,13 @@ public:
 
 	void set_teleport(bool tel);
 	bool get_teleport();
-	float scale_h;
-	float scale_v;
+	float amount_h = 0.0f;
+	float amount_v = 0.0f;
+	float scale_h = 0.0f;
+	float scale_v = 0.0f;
 
 	void despawn();
+	void despawn_custom_sprite();
 
 	glm::vec2 get_custom_position_0();
 	glm::vec2 get_custom_position_1();

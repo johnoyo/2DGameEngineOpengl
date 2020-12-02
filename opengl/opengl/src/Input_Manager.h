@@ -11,6 +11,6 @@ public:
 	int GetKeyRelease(GLFWwindow* window, int Key_Code);
 	int Check_State(GLFWwindow* window, int Key_Code);
 private:
-	int last_state_p = GLFW_RELEASE;
-	int last_state_r = GLFW_PRESS;
+	int last_state_p[349] = { GLFW_RELEASE };
+	int last_state_r[349] = { GLFW_PRESS };
 };

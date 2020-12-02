@@ -65,6 +65,7 @@ void Game::Load_Menu(float width, float height, float text_id) {
 	index_buffer.Make_Indecies(buffer.Get_Size());
 	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
 	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
+	current_level++;
 
 }
 
@@ -102,15 +103,15 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 
 }
 
-void Game::Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id) {
+void Game::Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id, glm::vec4 color) {
 
 	int index = buffer.Get_Size();
 	int size = buffer.Get_Size();
 
-	buffer.Fill_Buffer(tl, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), tex_id);
-	buffer.Fill_Buffer(tr, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), tex_id);
-	buffer.Fill_Buffer(br, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), tex_id);
-	buffer.Fill_Buffer(bl, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), tex_id);
+	buffer.Fill_Buffer(tl, color, glm::vec2(0.0f, 1.0f), tex_id);
+	buffer.Fill_Buffer(tr, color, glm::vec2(1.0f, 1.0f), tex_id);
+	buffer.Fill_Buffer(br, color, glm::vec2(1.0f, 0.0f), tex_id);
+	buffer.Fill_Buffer(bl, color, glm::vec2(0.0f, 0.0f), tex_id);
 
 }
 
@@ -235,11 +236,11 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	}
 
 	for (int i = 0; i < custom_sprite_list.size(); i++) {
-		Make_Custom_Sprite(custom_sprite_list.at(i).get_custom_position_0(), custom_sprite_list.at(i).get_custom_position_1(),
-									custom_sprite_list.at(i).get_custom_position_2(), custom_sprite_list.at(i).get_custom_position_3(), custom_sprite_list.at(i).get_texture_id());
-
+		std::cout << "Making custom sprite...\n";
 		custom_sprite_list.at(i).set_buffer_index(buffer.Get_Size(), buffer.Get_Size() + 1, buffer.Get_Size() + 2, buffer.Get_Size() + 3);
-
+		
+		Make_Custom_Sprite(custom_sprite_list.at(i).get_custom_position_0(), custom_sprite_list.at(i).get_custom_position_1(),
+									custom_sprite_list.at(i).get_custom_position_2(), custom_sprite_list.at(i).get_custom_position_3(), custom_sprite_list.at(i).get_texture_id(), custom_sprite_list.at(i).color);
 	}
 
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
@@ -249,7 +250,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1, p.at(s).i * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 5.0f);
 	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1, p.at(s).i * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 5.0f);
 
-
+	std::cout << buffer.Get_Size() << std::endl;
 	//for (int k = 0; k < ((p.size() + 1)*4); k++) {
 	//	std::cout << vertex[k].position.x << ", " << vertex[k].position.y << "\n";
 	//}
@@ -265,6 +266,23 @@ void Game::set_window(GLFWwindow * win)
 GLFWwindow * Game::get_window()
 {
 	return window;
+}
+
+void Game::Repeat_Every(double time_step, double& previous_time, std::function<void(void)> f)
+{
+	double current_time = glfwGetTime();
+	/* If a second has passed. */
+	if (current_time - previous_time >= time_step)
+	{
+		// do stuff here
+		f();
+
+		previous_time = current_time;
+	}
+
+	float new_time = glfwGetTime();
+	float frame_time = new_time - current_time;
+	current_time = new_time;
 }
 
 void Game::set_player(Player p)
@@ -346,15 +364,19 @@ void Game::update_buffer()
 	for (int i = 0; i < enemies_list.size(); i++) {
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].position.x = enemies_list.at(i).get_position().x;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].position.y = enemies_list.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[0]].tex_id = enemies_list.at(i).get_texture_id();
 
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[1]].position.x = enemies_list.at(i).get_position().x + tile_size;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[1]].position.y = enemies_list.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[1]].tex_id = enemies_list.at(i).get_texture_id();
 
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[2]].position.x = enemies_list.at(i).get_position().x + tile_size;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[2]].position.y = enemies_list.at(i).get_position().y;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[2]].tex_id = enemies_list.at(i).get_texture_id();
 
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].position.x = enemies_list.at(i).get_position().x;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].position.y = enemies_list.at(i).get_position().y;
+		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].tex_id = enemies_list.at(i).get_texture_id();
 	}
 
 	for (int i = 0; i < collectible_list.size(); i++) {
@@ -370,21 +392,54 @@ void Game::update_buffer()
 		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
 		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[3]].position.y = collectible_list.at(i).get_position().y;
 	}
-	
-	/*for (int i = 0; i < custom_sprite_list.size(); i++) {
-		
-		buffer[custom_sprite_list.at(i).get_buffer_index()[0]].position.x = custom_sprite_list.at(i).get_position().x;
-		buffer[custom_sprite_list.at(i).get_buffer_index()[0]].position.y = custom_sprite_list.at(i).get_position().y + tile_size;
 
-		buffer[custom_sprite_list.at(i).get_buffer_index()[1]].position.x = custom_sprite_list.at(i).get_position().x + tile_size;
-		buffer[custom_sprite_list.at(i).get_buffer_index()[1]].position.y = custom_sprite_list.at(i).get_position().y + tile_size;
+	/*for (int i = 0; i < list.size(); i++) {
+		for (int j = 0; i < list.at(i).size(); j++) {
 
-		buffer[custom_sprite_list.at(i).get_buffer_index()[2]].position.x = custom_sprite_list.at(i).get_position().x + tile_size;
-		buffer[custom_sprite_list.at(i).get_buffer_index()[2]].position.y = custom_sprite_list.at(i).get_position().y;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[0]].position.x = list.at(i).at(j).get_position().x;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[0]].position.y = list.at(i).at(j).get_position().y + tile_size;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[0]].tex_id = list.at(i).at(j).get_texture_id();
 
-		buffer[custom_sprite_list.at(i).get_buffer_index()[3]].position.x = custom_sprite_list.at(i).get_position().x;
-		buffer[custom_sprite_list.at(i).get_buffer_index()[3]].position.y = custom_sprite_list.at(i).get_position().y;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[1]].position.x = list.at(i).at(j).get_position().x + tile_size;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[1]].position.y = list.at(i).at(j).get_position().y + tile_size;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[1]].tex_id = list.at(i).at(j).get_texture_id();
+
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[2]].position.x = list.at(i).at(j).get_position().x + tile_size;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[2]].position.y = list.at(i).at(j).get_position().y;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[2]].tex_id = list.at(i).at(j).get_texture_id();
+
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[3]].position.x = list.at(i).at(j).get_position().x;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[3]].position.y = list.at(i).at(j).get_position().y;
+			buffer.Get_Buffer()[list.at(i).at(j).get_buffer_index()[3]].tex_id = list.at(i).at(j).get_texture_id();
+		}
 	}*/
+	
+	for (int i = 0; i < custom_sprite_list.size(); i++) {
+		
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[0]].position.x = custom_sprite_list.at(i).get_custom_position_0().x;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[0]].position.y = custom_sprite_list.at(i).get_custom_position_0().y;
+
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[1]].position.x = custom_sprite_list.at(i).get_custom_position_1().x;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[1]].position.y = custom_sprite_list.at(i).get_custom_position_1().y;
+
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[2]].position.x = custom_sprite_list.at(i).get_custom_position_2().x;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[2]].position.y = custom_sprite_list.at(i).get_custom_position_2().y;
+
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[3]].position.x = custom_sprite_list.at(i).get_custom_position_3().x;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[3]].position.y = custom_sprite_list.at(i).get_custom_position_3().y;
+
+		/*buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[0]].position.x = custom_sprite_list.at(i).get_position().x;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[0]].position.y = custom_sprite_list.at(i).get_position().y + tile_size;
+																													 
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[1]].position.x = custom_sprite_list.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[1]].position.y = custom_sprite_list.at(i).get_position().y + tile_size;
+																													 
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[2]].position.x = custom_sprite_list.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[2]].position.y = custom_sprite_list.at(i).get_position().y;
+																													 
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[3]].position.x = custom_sprite_list.at(i).get_position().x;
+		buffer.Get_Buffer()[custom_sprite_list.at(i).get_buffer_index()[3]].position.y = custom_sprite_list.at(i).get_position().y;*/
+	}
 	
 }
 

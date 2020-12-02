@@ -13,6 +13,7 @@
 #include "Texture_Manager.h"
 #include "Input_Manager.h"
 #include <irrKlang.h>
+#include <functional>
 //#pragma comment(lib, "irrKlang.lib")
 
 
@@ -27,6 +28,8 @@ public:
 	Input_Manager input_manager;
 	Orthographic_Camera m_Camera;
 	irrklang::ISoundEngine* SoundEngine;
+
+	std::vector<std::vector<Player>> list;
 
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
@@ -80,13 +83,15 @@ public:
 	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
 	
-	void Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id);
+	void Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id, glm::vec4 color);
 	void Change_Sprite_Scale(Player sp, float x);
 
 	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);
 
 	void set_window(GLFWwindow *win);
 	GLFWwindow *get_window();
+
+	void Repeat_Every(double time_step, double& previous_time, std::function<void(void)> f);
 
 	std::vector<int> l;
 
