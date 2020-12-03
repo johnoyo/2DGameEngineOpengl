@@ -5,9 +5,11 @@ Player::Player()
 	health = -100.0f;
 }
 
-Player::Player(unsigned int texture_id, glm::vec2 pos, float scale) : texture_id(texture_id), position(pos), scale(scale)
+Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, float scale) : texture_id(texture_id), position(pos), scale(scale)
 {
+	std::cout << "Player: " << position.x << "," << position.y << "\n";
 	health = 100.0f;
+	set_buffer_index(index, index + 1, index + 2, index + 3);
 }
 
 Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos) : texture_id(texture_id), position(pos)
@@ -61,6 +63,14 @@ void Player::set_custom_position(glm::vec2 position, float width, float height, 
 	custom_position_0 = { position.x + offset, position.y };
 	custom_position_1 = { position.x + width,  position.y };
 	custom_position_2 = { position.x + width,  position.y + height };
+	custom_position_3 = { position.x + offset, position.y + height };
+}
+
+void Player::set_custom_position(glm::vec2 position, float width, float height, float offset, float offset1)
+{
+	custom_position_0 = { position.x + offset, position.y };
+	custom_position_1 = { position.x + width + offset1,  position.y };
+	custom_position_2 = { position.x + width + offset1,  position.y + height };
 	custom_position_3 = { position.x + offset, position.y + height };
 }
 

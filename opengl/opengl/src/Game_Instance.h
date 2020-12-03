@@ -19,7 +19,7 @@ public:
 	float current_time1 = 0.0f;
 
 	bool despawn = true, rs = false, rw = false, ls = false, lw = false;
-	int uses = 5;
+	int uses = 0, damage = 0;
 
 	std::vector<glm::vec2> pos;
 	Line line;
@@ -54,13 +54,9 @@ public:
 
 	void update() override {
 
-		if (current_level == 0) {
-			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
-				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
-			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
-				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu.png"));
-			}
-		} else if (current_level == 1) {
+		if (current_level == 1) {
+			//std::cout << "Level1\n";
+			m_Camera.Set_Position({ 0.0f, 0.0f, 0.0f });
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
@@ -98,11 +94,33 @@ public:
 					{ 100.0f + 50.0f, 100.0f - 10.0f },
 					{ 100.0f, 100.0f - 10.0f }
 				);
+				
+				Player ray_uses = Player(
+					0,
+					glm::vec4(1.0f, 0.5f, 1.0f, 1.0f),
+					{ 0.0f, 540.0f },
+					{ 135.0f, 540.0f },
+					{ 135.0f, 513.0f },
+					{ 0.0f, 513.0f }
+				);
+
+				Player health = Player(
+					0, 
+					glm::vec4(1.0f, 0.5f, 0.5f, 1.0f),
+					{ 135.0f, 540.0f },
+					{ 945.0f, 540.0f },
+					{ 945.0f, 513.0f },
+					{ 135.0f, 513.0f }
+				);
 
 				custom_sprite_list.push_back(ray);
+				custom_sprite_list.push_back(ray_uses);
+				custom_sprite_list.push_back(health);
 				Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
-				m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
+				m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
+
 				p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+				
 			}
 		}
 		else
@@ -131,9 +149,12 @@ public:
 			if (amount_y > 0) scale_v = -p1.get_scale();
 			else scale_v = p1.get_scale();
 
-			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE) && uses != 0) {
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE) && uses != 5) {
 
-				uses--;
+				uses++;
+				custom_sprite_list.at(1).custom_position_1.x -= 27.0f;
+				custom_sprite_list.at(1).custom_position_2.x -= 27.0f;
+
 				if (scale_h > 0) {
 					line = Line(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x - 200.0f, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y);
 
@@ -168,12 +189,23 @@ public:
 
 			m_Camera.Set_Position_x(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f));
 			Background.fix_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 0.0f }));
+			custom_sprite_list.at(1).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 513.0f }), 135.0f, 27.0f, 0.0f, -uses*27.0f);
+			custom_sprite_list.at(2).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) + 135.0f , 513.0f }), 823.0f, 27.0f, 0.0f, -damage*10.0f);
 
+			if (damage * 10 > 823.0f) {
+				std::cout << "Game Over!\n";
+				damage = 0;
+				uses = 0;
+				//p1.fix_position({ 80.0f, 26.0f });
+				amount_x = 0.0f;
+				amount_y = 0.0f;
+				Game_Over(texture_manager.Find("res/textures/main_menu.png"));
+			}
 
 			for (int i = 0; i < enemies_list.size(); i++) {
 
 				if (check_if_obj_collides_with_obj(p1, enemies_list.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
-					
+					damage++;
 				}
 
 			}
@@ -231,7 +263,7 @@ public:
 					std::string level3 = "res/levels/test3.txt";
 					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
 					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
-					m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
+					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
 				}
 			} else if (current_level == 7) {
 				//level 2 of actual game

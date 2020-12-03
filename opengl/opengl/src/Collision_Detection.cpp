@@ -44,7 +44,7 @@ struct Vertex_Array* change_positions(Player *p, struct Vertex_Array* vertex, in
 	vertex[p->get_buffer_index()[2]].position.y += amount_y;
 	vertex[p->get_buffer_index()[3]].position.x += amount_x;
 	vertex[p->get_buffer_index()[3]].position.y += amount_y;
-	p->fix_position({ vertex[p->get_buffer_index()[3]].position.x, vertex[p->get_buffer_index()[3]].position.y });
+	//p->fix_position({ vertex[p->get_buffer_index()[3]].position.x, vertex[p->get_buffer_index()[3]].position.y });
 	return vertex;
 }
 
@@ -109,7 +109,7 @@ struct Vertex_Array* check_for_collitions(struct Vertex_Array* vertex, Player *p
 	}
 	*is_grounded = false;
 	*collides = false;
-	p->fix_position({ vertex[p->get_buffer_index()[3]].position.x, vertex[p->get_buffer_index()[3]].position.y });
+	//p->fix_position({ vertex[p->get_buffer_index()[3]].position.x, vertex[p->get_buffer_index()[3]].position.y });
 	return vertex;
 }
 

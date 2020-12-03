@@ -96,8 +96,8 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 
 	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 
-	p1 = Player(renderer.Get_Texture_Slot()[0] - 1, buffer.Get_Buffer()[buffer.Get_Size() - 1].position, character_scale - 1.0f);
-	p1.set_buffer_index(buffer.Get_Size() - 4, buffer.Get_Size() - 3, buffer.Get_Size() - 2, buffer.Get_Size() - 1);
+	/*p1 = Player(renderer.Get_Texture_Slot()[0] - 1, buffer.Get_Buffer()[buffer.Get_Size() - 1].position, character_scale - 1.0f);
+	p1.set_buffer_index(buffer.Get_Size() - 4, buffer.Get_Size() - 3, buffer.Get_Size() - 2, buffer.Get_Size() - 1);*/
 
 	current_level++;
 
@@ -188,6 +188,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		else if (c == 'P')
 		{
 			p.push_back({ i,j,5.0f });
+			std::cout << "i,j = " << i << ", " << j << "\n";
 			s = p.size() - 1;
 		}
 		if (j == w) {
@@ -245,6 +246,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	}
 
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
+	p1 = Player(5, buffer.Get_Size(), glm::vec2(p.at(s).j * character_scale - 1.0f, p.at(s).i * character_scale - 1.0f), character_scale - 1.0f);
 
 	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1.0f, (p.at(s).i + 1) * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 5.0f);
 	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1.0f, (p.at(s).i + 1) * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 5.0f);
@@ -314,6 +316,7 @@ void Game::update_buffer()
 {
 	if (p1.get_teleport())
 	{
+		std::cout << "Fix:" << p1.get_position().x << "," << p1.get_position().y << "\n";
 		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
 		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
 			   										  
@@ -552,7 +555,7 @@ void Game::handle_opengl()
 
 void Game::update_player_position(float amount_x, float amount_y)
 {
-	p1.change_position(glm::vec2(amount_x, amount_y));
+	//p1.change_position(glm::vec2(amount_x, amount_y));
 
 	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x += amount_x;
 	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y += amount_y;
