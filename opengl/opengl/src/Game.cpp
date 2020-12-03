@@ -96,7 +96,7 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 
 	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 
-	p1 = Player(renderer.Get_Texture_Slot()[0] - 1, buffer.Get_Buffer()[buffer.Get_Size() - 1].position, character_scale - 1);
+	p1 = Player(renderer.Get_Texture_Slot()[0] - 1, buffer.Get_Buffer()[buffer.Get_Size() - 1].position, character_scale - 1.0f);
 	p1.set_buffer_index(buffer.Get_Size() - 4, buffer.Get_Size() - 3, buffer.Get_Size() - 2, buffer.Get_Size() - 1);
 
 	current_level++;
@@ -133,7 +133,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 
 	if (!f) return;
 	char c;
-	char acc[2];
+	char acc[3];
 	int i = 0, j = 0, s = 0, h = 0, w = 0;
 	int index = 0;
 
@@ -240,15 +240,16 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		custom_sprite_list.at(i).set_buffer_index(buffer.Get_Size(), buffer.Get_Size() + 1, buffer.Get_Size() + 2, buffer.Get_Size() + 3);
 		
 		Make_Custom_Sprite(custom_sprite_list.at(i).get_custom_position_0(), custom_sprite_list.at(i).get_custom_position_1(),
-									custom_sprite_list.at(i).get_custom_position_2(), custom_sprite_list.at(i).get_custom_position_3(), custom_sprite_list.at(i).get_texture_id(), custom_sprite_list.at(i).color);
+			custom_sprite_list.at(i).get_custom_position_2(), custom_sprite_list.at(i).get_custom_position_3(),
+			custom_sprite_list.at(i).get_texture_id(), custom_sprite_list.at(i).color);
 	}
 
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
 
-	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 5.0f);
-	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1, (p.at(s).i + 1) * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 5.0f);
-	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1, p.at(s).i * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 5.0f);
-	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1, p.at(s).i * character_scale - 1), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1.0f, (p.at(s).i + 1) * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1.0f, (p.at(s).i + 1) * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1.0f, p.at(s).i * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 5.0f);
+	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1.0f, p.at(s).i * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 5.0f);
 
 	std::cout << buffer.Get_Size() << std::endl;
 	//for (int k = 0; k < ((p.size() + 1)*4); k++) {
