@@ -39,6 +39,7 @@ public:
 		texture_manager.Load_Texture(renderer, "res/textures/player_lw.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_rs.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_ls.png");
+		texture_manager.Load_Texture(renderer, "res/textures/yellow-brick-wall_1.jpg");
 
 		Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu.png"));
 		
@@ -106,7 +107,7 @@ public:
 
 				Player health = Player(
 					0, 
-					glm::vec4(1.0f, 0.5f, 0.5f, 1.0f),
+					glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
 					{ 135.0f, 540.0f },
 					{ 945.0f, 540.0f },
 					{ 945.0f, 513.0f },
@@ -131,6 +132,16 @@ public:
 					if (amount_x > 0) amount_x -= 0.5f;
 					else amount_x = 0;
 				} else {
+					if (amount_x < 0) amount_x += 0.5f;
+					else amount_x = 0;
+				}
+			}
+			else {
+				if (scale_h < 0) {
+					if (amount_x > 0) amount_x -= 0.5f;
+					else amount_x = 0;
+				}
+				else {
 					if (amount_x < 0) amount_x += 0.5f;
 					else amount_x = 0;
 				}
@@ -165,9 +176,11 @@ public:
 
 					custom_sprite_list.at(0).set_custom_position(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position, 200.0f, -5.0f, 35.0f);
 				}
-				if (line.Intersects(enemies_list.at(0), buffer)) {
-					SoundEngine->play2D("res/audio/bleep.mp3");
-					enemies_list.at(0).despawn();
+				for (int i = 0; i < enemies_list.size(); i++) {
+					if (line.Intersects(enemies_list.at(i), buffer)) {
+						SoundEngine->play2D("res/audio/bleep.mp3");
+						enemies_list.at(i).despawn();
+					}
 				}
 				
 			} else {
@@ -260,13 +273,24 @@ public:
 					amount_x = 0.0f;
 					amount_y = 0.0f;
 					Next_Level.despawn();
-					std::string level3 = "res/levels/test3.txt";
-					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
+					std::string level2 = "res/levels/test2.txt";
+					Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
 					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
 					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
 				}
 			} else if (current_level == 7) {
 				//level 2 of actual game
+				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
+
+					std::cout << "Changing level\n";
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					Next_Level.despawn();
+					std::string level3 = "res/levels/test3.txt";
+					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
+					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
+				}
 			} else if (current_level == 8) {
 				//level 3 of actual game
 			} else if (current_level == 9) {

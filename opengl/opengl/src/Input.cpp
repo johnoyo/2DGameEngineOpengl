@@ -9,7 +9,8 @@ int handle_input_hor(GLFWwindow* window, Player *p, float speed, float acc, floa
 		 /*std::cout << "Key D pressed\n"; */
 		*scale = -player_scale;
 
-		if (is_grounded) *amount_x = speed * acc;
+		if (is_grounded) 
+			*amount_x = speed * acc;
 		else *amount_x = (speed - 1);
 		
 		(*p).change_position(glm::vec2(*amount_x, 0.0f));
@@ -19,7 +20,8 @@ int handle_input_hor(GLFWwindow* window, Player *p, float speed, float acc, floa
 		 /*std::cout << "Key A pressed\n"; */
 		*scale = player_scale;
 
-		if (is_grounded) *amount_x = -speed * acc;
+		if (is_grounded) 
+			*amount_x = -speed * acc;
 		else *amount_x = -(speed - 1);
 
 

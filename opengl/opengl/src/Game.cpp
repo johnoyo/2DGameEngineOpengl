@@ -205,10 +205,10 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 
 	/* Background data(position, color, texture) gets added first to the vertex buffer */
 	Background = Player(6.0f, buffer.Get_Size(), glm::vec2(0.0f, 0.0f));
-	buffer.Fill_Buffer(glm::vec2(0.0f, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 6.0f);
-	buffer.Fill_Buffer(glm::vec2(width, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 6.0f);
-	buffer.Fill_Buffer(glm::vec2(width, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 6.0f);
-	buffer.Fill_Buffer(glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 6.0f);
+	buffer.Fill_Buffer(glm::vec2(0.0f, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 14.0f);
+	buffer.Fill_Buffer(glm::vec2(width, height), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 14.0f);
+	buffer.Fill_Buffer(glm::vec2(width, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f), 14.0f);
+	buffer.Fill_Buffer(glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), 14.0f);
 
 	
 	for (int k = 0; k < p.size(); k++) {
