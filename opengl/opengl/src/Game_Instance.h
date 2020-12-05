@@ -19,9 +19,11 @@ public:
 	float current_time1 = 0.0f;
 
 	bool despawn = true, rs = false, rw = false, ls = false, lw = false;
-	int uses = 0, damage = 0;
+	int uses = 0, damage = 0, score = 0;
+	glm::vec2 save_next_lvl_pos;
 
 	std::vector<glm::vec2> pos;
+	std::string current_level_played;
 	Line line;
 
 	void init() override {
@@ -85,7 +87,7 @@ public:
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
-				std::string level1 = "res/levels/test1.txt";
+				current_level_played = "res/levels/test1.txt";
 
 				Player ray = Player(
 					0, 
@@ -117,10 +119,13 @@ public:
 				custom_sprite_list.push_back(ray);
 				custom_sprite_list.push_back(ray_uses);
 				custom_sprite_list.push_back(health);
-				Load_Next_Level(level1, 945.0f, 540.0f, 27.0f);
-				m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
+				Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
+				m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
 
 				p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+				save_next_lvl_pos = Next_Level.get_position();
+				Next_Level.despawn();
+				score = 0;
 				
 			}
 		}
@@ -193,6 +198,29 @@ public:
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_A)) p1.set_texture_id(texture_manager.Find("res/textures/player_l.png"));
 
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_D)) p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_R)) {
+				std::cout << "Restarting level\n";
+				amount_x = 0.0f;
+				amount_y = 0.0f;
+				Next_Level.despawn();
+				Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
+				current_level--;
+				p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+				m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
+				amount_x = 0.0f;
+				amount_y = 0.0f;
+				save_next_lvl_pos = Next_Level.get_position();
+				Next_Level.despawn();
+				score = 0;
+				uses = 0;
+				damage = 0;
+			}
+
+			if (score == 3) {
+				Next_Level.fix_position(save_next_lvl_pos);
+				score = 0;
+			}
 			
 			
 
@@ -209,7 +237,6 @@ public:
 				std::cout << "Game Over!\n";
 				damage = 0;
 				uses = 0;
-				//p1.fix_position({ 80.0f, 26.0f });
 				amount_x = 0.0f;
 				amount_y = 0.0f;
 				Game_Over(texture_manager.Find("res/textures/main_menu.png"));
@@ -227,7 +254,18 @@ public:
 
 				if (check_if_obj_collides_with_obj(p1, collectible_list.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
 					collectible_list.at(i).despawn();
+					score++;
 					
+				}
+
+			}
+
+			for (int i = 0; i < collectible_list1.size(); i++) {
+
+				if (check_if_obj_collides_with_obj(p1, collectible_list1.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
+					collectible_list1.at(i).despawn();
+					if(uses > 0) uses--;
+
 				}
 
 			}
@@ -273,10 +311,17 @@ public:
 					amount_x = 0.0f;
 					amount_y = 0.0f;
 					Next_Level.despawn();
-					std::string level2 = "res/levels/test2.txt";
-					Load_Next_Level(level2, 945.0f, 540.0f, 27.0f);
+					current_level_played = "res/levels/test2.txt";
+					Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
 					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
-					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
+					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					save_next_lvl_pos = Next_Level.get_position();
+					Next_Level.despawn();
+					score = 0;
+					uses = 0;
+					damage = 0;
 				}
 			} else if (current_level == 7) {
 				//level 2 of actual game
@@ -286,10 +331,17 @@ public:
 					amount_x = 0.0f;
 					amount_y = 0.0f;
 					Next_Level.despawn();
-					std::string level3 = "res/levels/test3.txt";
-					Load_Next_Level(level3, 945.0f, 540.0f, 27.0f);
+					current_level_played = "res/levels/test3.txt";
+					Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
 					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
-					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), p1.get_position().y - p1.get_scale(), 0.0f });
+					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					save_next_lvl_pos = Next_Level.get_position();
+					Next_Level.despawn();
+					score = 0;
+					uses = 0;
+					damage = 0;
 				}
 			} else if (current_level == 8) {
 				//level 3 of actual game

@@ -85,6 +85,7 @@ void Game::Game_Over(float text_id) {
 void Game::Load_Next_Level(std::string& level_path, float width, float height, float character_scale) {
 
 	collectible_list.clear();
+	collectible_list1.clear();
 	enemies_list.clear();
 
 	load_level(buffer.Get_Buffer(), level_path, width, height, character_scale);
@@ -177,6 +178,10 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		{
 			p.push_back({ i,j,3.0f });
 		}
+		else if (c == 'R')
+		{
+			p.push_back({ i,j,9.0f });
+		}
 		else if (c == 'E')
 		{
 			p.push_back({ i,j,4.0f });
@@ -226,6 +231,9 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		else if (p.at(k).k == 8.0f) {
 
 			Next_Level = Player(8, buffer.Get_Size(), glm::vec2(p.at(k).j * character_scale, p.at(k).i * character_scale));
+		} else if (p.at(k).k == 9.0f) {
+
+			collectible_list1.push_back(Player(9, buffer.Get_Size(), glm::vec2(p.at(k).j* character_scale, p.at(k).i* character_scale)));
 		}
 
 		buffer.Fill_Buffer(glm::vec2(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), p.at(k).k);
@@ -395,6 +403,20 @@ void Game::update_buffer()
 
 		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[3]].position.x = collectible_list.at(i).get_position().x;
 		buffer.Get_Buffer()[collectible_list.at(i).get_buffer_index()[3]].position.y = collectible_list.at(i).get_position().y;
+	}
+
+	for (int i = 0; i < collectible_list1.size(); i++) {
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[0]].position.x = collectible_list1.at(i).get_position().x;
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[0]].position.y = collectible_list1.at(i).get_position().y + tile_size;
+
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[1]].position.x = collectible_list1.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[1]].position.y = collectible_list1.at(i).get_position().y + tile_size;
+
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[2]].position.x = collectible_list1.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[2]].position.y = collectible_list1.at(i).get_position().y;
+
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[3]].position.x = collectible_list1.at(i).get_position().x;
+		buffer.Get_Buffer()[collectible_list1.at(i).get_buffer_index()[3]].position.y = collectible_list1.at(i).get_position().y;
 	}
 
 	/*for (int i = 0; i < list.size(); i++) {

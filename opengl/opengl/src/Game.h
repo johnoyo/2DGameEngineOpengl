@@ -33,6 +33,7 @@ public:
 
 	std::vector<Player> enemies_list;
 	std::vector<Player> collectible_list;
+	std::vector<Player> collectible_list1;
 	std::vector<Player> custom_sprite_list;
 	std::vector<Player> shadow_quad_list;
 
