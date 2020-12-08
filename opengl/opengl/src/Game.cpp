@@ -87,6 +87,7 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 	collectible_list.clear();
 	collectible_list1.clear();
 	enemies_list.clear();
+	enemies_list1.clear();
 
 	load_level(buffer.Get_Buffer(), level_path, width, height, character_scale);
 	std::cout << "size: " << buffer.Get_Size() << ", total size: " << total_buffer_size << "\n";
@@ -169,7 +170,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 	std::vector<pos> p;
 	while ((c = fgetc(f)) != EOF) {
 		if (c == 'B') {
-			p.push_back({ i,j,1.0f });
+			p.push_back({ i,j,16.0f });
 		}
 		else if (c == 'G') {
 			p.push_back({ i,j,1.0f });
@@ -180,7 +181,7 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 		}
 		else if (c == 'R')
 		{
-			p.push_back({ i,j,9.0f });
+			p.push_back({ i,j,15.0f });
 		}
 		else if (c == 'E')
 		{
@@ -228,12 +229,16 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 
 			enemies_list.push_back(Player(4, buffer.Get_Size(), glm::vec2(p.at(k).j* character_scale, p.at(k).i* character_scale)));
 		}
+		else if (p.at(k).k == 16.0f) {
+
+			enemies_list1.push_back(Player(16, buffer.Get_Size(), glm::vec2(p.at(k).j * character_scale, p.at(k).i * character_scale)));
+		}
 		else if (p.at(k).k == 8.0f) {
 
 			Next_Level = Player(8, buffer.Get_Size(), glm::vec2(p.at(k).j * character_scale, p.at(k).i * character_scale));
-		} else if (p.at(k).k == 9.0f) {
+		} else if (p.at(k).k == 15.0f) {
 
-			collectible_list1.push_back(Player(9, buffer.Get_Size(), glm::vec2(p.at(k).j* character_scale, p.at(k).i* character_scale)));
+			collectible_list1.push_back(Player(15, buffer.Get_Size(), glm::vec2(p.at(k).j* character_scale, p.at(k).i* character_scale)));
 		}
 
 		buffer.Fill_Buffer(glm::vec2(p.at(k).j * character_scale, (p.at(k).i + 1) * character_scale), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), p.at(k).k);
@@ -389,6 +394,24 @@ void Game::update_buffer()
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].position.x = enemies_list.at(i).get_position().x;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].position.y = enemies_list.at(i).get_position().y;
 		buffer.Get_Buffer()[enemies_list.at(i).get_buffer_index()[3]].tex_id = enemies_list.at(i).get_texture_id();
+	}
+
+	for (int i = 0; i < enemies_list1.size(); i++) {
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[0]].position.x = enemies_list1.at(i).get_position().x;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[0]].position.y = enemies_list1.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[0]].tex_id = enemies_list1.at(i).get_texture_id();
+
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[1]].position.x = enemies_list1.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[1]].position.y = enemies_list1.at(i).get_position().y + tile_size;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[1]].tex_id = enemies_list1.at(i).get_texture_id();
+
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[2]].position.x = enemies_list1.at(i).get_position().x + tile_size;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[2]].position.y = enemies_list1.at(i).get_position().y;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[2]].tex_id = enemies_list1.at(i).get_texture_id();
+
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[3]].position.x = enemies_list1.at(i).get_position().x;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[3]].position.y = enemies_list1.at(i).get_position().y;
+		buffer.Get_Buffer()[enemies_list1.at(i).get_buffer_index()[3]].tex_id = enemies_list1.at(i).get_texture_id();
 	}
 
 	for (int i = 0; i < collectible_list.size(); i++) {

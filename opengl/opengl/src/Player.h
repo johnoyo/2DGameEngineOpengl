@@ -26,8 +26,8 @@ public:
 	~Player();
 	void change_position(glm::vec2 new_pos);
 	void fix_position(glm::vec2 new_pos);
-	void set_custom_position(glm::vec2 position, float width, float height, float offset);
-	void set_custom_position(glm::vec2 position, float width, float height, float offset, float offset1);
+	void set_custom_position(glm::vec2 position, float width, float height1, float height2, float offset);
+	void set_custom_position(glm::vec2 position, float width, float height, float offset1);
 	void respawn(glm::vec2 new_pos);
 	glm::vec2 get_position();
 	float get_health();

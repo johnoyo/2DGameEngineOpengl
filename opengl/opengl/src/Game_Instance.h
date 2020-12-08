@@ -19,7 +19,7 @@ public:
 	float current_time1 = 0.0f;
 
 	bool despawn = true, rs = false, rw = false, ls = false, lw = false;
-	int uses = 0, damage = 0, score = 0;
+	int coins_collected = 0, uses = 0, damage = 0, score = 0;
 	glm::vec2 save_next_lvl_pos;
 
 	std::vector<glm::vec2> pos;
@@ -28,27 +28,34 @@ public:
 
 	void init() override {
 
-		texture_manager.Load_Texture(renderer, "res/textures/factory_tile.png");
-		texture_manager.Load_Texture(renderer, "res/textures/main_menu.png");
-		texture_manager.Load_Texture(renderer, "res/textures/collectible.png");
+		texture_manager.Load_Texture(renderer, "res/textures/brick_3.png");
+		texture_manager.Load_Texture(renderer, "res/textures/start_screen_1.png");
+		texture_manager.Load_Texture(renderer, "res/textures/coinA.png");
 		texture_manager.Load_Texture(renderer, "res/textures/enemy.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_r.png");
-		texture_manager.Load_Texture(renderer, "res/textures/factory_bg_6.png");
+		texture_manager.Load_Texture(renderer, "res/textures/how_to_screen.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_l.png");
 		texture_manager.Load_Texture(renderer, "res/textures/next_level_button.png");
-		texture_manager.Load_Texture(renderer, "res/textures/win_congrats_screen.png");
+		texture_manager.Load_Texture(renderer, "res/textures/start_screen_2.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_rw.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_lw.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_rs.png");
 		texture_manager.Load_Texture(renderer, "res/textures/player_ls.png");
-		texture_manager.Load_Texture(renderer, "res/textures/yellow-brick-wall_1.jpg");
+		texture_manager.Load_Texture(renderer, "res/textures/brickWall_3.jpg");
+		texture_manager.Load_Texture(renderer, "res/textures/rayA.png");
+		texture_manager.Load_Texture(renderer, "res/textures/enemy_1A.png");
+		texture_manager.Load_Texture(renderer, "res/textures/start_screen_3.png");
+		texture_manager.Load_Texture(renderer, "res/textures/start_screen_4.png");
+		texture_manager.Load_Texture(renderer, "res/textures/start_screen_5.png");
+		texture_manager.Load_Texture(renderer, "res/textures/main_menu_screen.png");
 
-		Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu.png"));
+
+		Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_1.png"));
 		
 
+		SoundEngine->play2D("res/audio/breakout.mp3", true);
 		p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
 
-		SoundEngine->play2D("res/audio/breakout.mp3", true);
 		//m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 		line = Line(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x , buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + 100.0f, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y);
 
@@ -58,32 +65,53 @@ public:
 	void update() override {
 
 		if (current_level == 1) {
-			//std::cout << "Level1\n";
+			//MAIN MENU
 			m_Camera.Set_Position({ 0.0f, 0.0f, 0.0f });
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
-				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/win_congrats_screen.png"));
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_2.png"));
 			}
 		} else if (current_level == 2) {
+			// INTRO
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
-				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu.png"));
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_3.png"));
 			}
 		} else if (current_level == 3) {
+			// GAMES PRESENTED
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
-				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/win_congrats_screen.png"));
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_4.png"));
 			}
 		} else if (current_level == 4) {
+			// GOTY REVEAL
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
-				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu.png"));
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_5.png"));
 			}
-		} else if (current_level == 5) {
+		} 
+		else if (current_level == 5) {
+			// TRANSITION SCREEN TO PLAY ACTUAL GAME
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
+				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
+			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu_screen.png"));
+			}
+		}
+		else if (current_level == 6) {
+			//MAIN MENU OF GAME
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
+				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
+			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/how_to_screen.png"));
+			}
+		}
+		else if (current_level == 7) {
+			//HOW TO SCREEN
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
@@ -98,25 +126,36 @@ public:
 					{ 100.0f, 100.0f - 10.0f }
 				);
 				
+				Player coins = Player(
+					0,
+					glm::vec4(1.0f, 0.25f, 0.0f, 1.0f),
+					{ 0.0f, 0.0f },
+					{ 81.0f, 0.0f },
+					{ 81.0f, 0.0f },
+					{ 0.0f, 0.0f }
+				);
+
 				Player ray_uses = Player(
 					0,
 					glm::vec4(1.0f, 0.5f, 1.0f, 1.0f),
-					{ 0.0f, 540.0f },
-					{ 135.0f, 540.0f },
-					{ 135.0f, 513.0f },
-					{ 0.0f, 513.0f }
+					{ 81.0f, 540.0f },
+					{ 216.0f, 540.0f },
+					{ 216.0f, 520.0f },
+					{ 81.0f, 520.0f }
 				);
 
 				Player health = Player(
 					0, 
 					glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-					{ 135.0f, 540.0f },
+					{ 216.0f, 540.0f },
 					{ 945.0f, 540.0f },
-					{ 945.0f, 513.0f },
-					{ 135.0f, 513.0f }
+					{ 945.0f, 520.0f },
+					{ 216.0f, 520.0f }
 				);
 
+
 				custom_sprite_list.push_back(ray);
+				custom_sprite_list.push_back(coins);
 				custom_sprite_list.push_back(ray_uses);
 				custom_sprite_list.push_back(health);
 				Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
@@ -174,12 +213,12 @@ public:
 				if (scale_h > 0) {
 					line = Line(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x - 200.0f, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y);
 
-					custom_sprite_list.at(0).set_custom_position(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position, -200.0f, -5.0f, -10.0f);
+					custom_sprite_list.at(0).set_custom_position(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position, -200.0f, -8.0f, -18.0f, -10.0f);
 				}
 				else {
 					line = Line(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + 200.0f, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y);
 
-					custom_sprite_list.at(0).set_custom_position(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position, 200.0f, -5.0f, 35.0f);
+					custom_sprite_list.at(0).set_custom_position(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position, 200.0f, -8.0f, -18.0f, 35.0f);
 				}
 				for (int i = 0; i < enemies_list.size(); i++) {
 					if (line.Intersects(enemies_list.at(i), buffer)) {
@@ -215,6 +254,10 @@ public:
 				score = 0;
 				uses = 0;
 				damage = 0;
+				x = 0.0f;
+				y = 0.0f;
+				y1 = 0.0f;
+				coins_collected = 0;
 			}
 
 			if (score == 3) {
@@ -230,16 +273,41 @@ public:
 
 			m_Camera.Set_Position_x(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f));
 			Background.fix_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 0.0f }));
-			custom_sprite_list.at(1).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 513.0f }), 135.0f, 27.0f, 0.0f, -uses*27.0f);
-			custom_sprite_list.at(2).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) + 135.0f , 513.0f }), 823.0f, 27.0f, 0.0f, -damage*10.0f);
+			custom_sprite_list.at(1).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 520.0f }), 0.0f, 20.0f, coins_collected * 27.0f);
+			custom_sprite_list.at(2).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) + 81.0f , 520.0f }), 135.0f, 20.0f, -uses*27.0f);
+			custom_sprite_list.at(3).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) + 216.0f , 520.0f }), 823.0f, 20.0f, -damage*10.0f);
 
 			if (damage * 10 > 823.0f) {
-				std::cout << "Game Over!\n";
+				/*std::cout << "Game Over!\n";
 				damage = 0;
 				uses = 0;
+				score = 0;
+				coins_collected = 0;
 				amount_x = 0.0f;
 				amount_y = 0.0f;
-				Game_Over(texture_manager.Find("res/textures/main_menu.png"));
+				x = 0.0f;
+				y = 0.0f;
+				y1 = 0.0f;
+				Game_Over(texture_manager.Find("res/textures/start_screen_1.png"));*/
+				std::cout << "Restarting level\n";
+				amount_x = 0.0f;
+				amount_y = 0.0f;
+				Next_Level.despawn();
+				Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
+				current_level--;
+				p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+				m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
+				amount_x = 0.0f;
+				amount_y = 0.0f;
+				save_next_lvl_pos = Next_Level.get_position();
+				Next_Level.despawn();
+				score = 0;
+				uses = 0;
+				damage = 0;
+				x = 0.0f;
+				y = 0.0f;
+				y1 = 0.0f;
+				coins_collected = 0;
 			}
 
 			for (int i = 0; i < enemies_list.size(); i++) {
@@ -250,12 +318,38 @@ public:
 
 			}
 
+			for (int i = 0; i < enemies_list1.size(); i++) {
+
+				if (check_if_obj_collides_with_obj(p1, enemies_list1.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
+					std::cout << "Restarting level\n";
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					Next_Level.despawn();
+					Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
+					current_level--;
+					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					save_next_lvl_pos = Next_Level.get_position();
+					Next_Level.despawn();
+					score = 0;
+					uses = 0;
+					damage = 0;
+					x = 0.0f;
+					y = 0.0f;
+					y1 = 0.0f;
+					coins_collected = 0;
+				}
+
+			}
+
 			for (int i = 0; i < collectible_list.size(); i++) {
 
 				if (check_if_obj_collides_with_obj(p1, collectible_list.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
 					collectible_list.at(i).despawn();
 					score++;
-					
+					coins_collected++;
 				}
 
 			}
@@ -303,8 +397,21 @@ public:
 				});
 
 			//std::cout << "Camera pos: " << m_Camera.Get_Position().x << ", " << m_Camera.Get_Position().y << "\n";
-			if (current_level == 6) {
+			if (current_level == 8) {
 				//level 1 of actual game
+				
+				if (enemies_list1.at(0).get_position().x >= 621.0f)
+				{
+					x = -2.0f;
+				}
+				else if (enemies_list1.at(0).get_position().x <= 54.0f)
+				{
+					x = 2.0f;
+				}
+
+				enemies_list1.at(0).change_position({ x, 0.0f });
+
+
 				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
 
 					std::cout << "Changing level\n";
@@ -322,9 +429,26 @@ public:
 					score = 0;
 					uses = 0;
 					damage = 0;
+					x = 0.0f;
+					y = 0.0f;
+					y1 = 0.0f;
+					coins_collected = 0;
 				}
-			} else if (current_level == 7) {
+			} else if (current_level == 9) {
 				//level 2 of actual game
+
+				if (enemies_list1.at(0).get_position().y >= 108.0f) y = -1.0f;
+				else if (enemies_list1.at(0).get_position().y <= 27.0f) y = 1.0f;
+
+				for (int i = 0; i < 10; i++)
+					enemies_list1.at(i).change_position({ 0.0f, y });
+
+				if (enemies_list1.at(10).get_position().y >= 108.0f) y1 = -1.0f;
+				else if (enemies_list1.at(10).get_position().y <= 27.0f) y1 = 1.0f;
+
+				for (int i = 10; i < 18; i++)
+					enemies_list1.at(i).change_position({ 0.0f, y1 });
+
 				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
 
 					std::cout << "Changing level\n";
@@ -343,17 +467,36 @@ public:
 					uses = 0;
 					damage = 0;
 				}
-			} else if (current_level == 8) {
-				//level 3 of actual game
-			} else if (current_level == 9) {
-				//level 4 of actual game
 			} else if (current_level == 10) {
-				//level 5 of actual game
+				//level 3 of actual game
+
+				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
+
+					std::cout << "Changing level\n";
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					Next_Level.despawn();
+					current_level_played = "res/levels/test3.txt";
+					Load_Next_Level(current_level_played, 945.0f, 540.0f, 27.0f);
+					p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
+					m_Camera.Set_Position({ p1.get_position().x - (945.0f / 2.0f), 0.0f, 0.0f });
+					amount_x = 0.0f;
+					amount_y = 0.0f;
+					save_next_lvl_pos = Next_Level.get_position();
+					Next_Level.despawn();
+					score = 0;
+					uses = 0;
+					damage = 0;
+				}
 			} else if (current_level == 11) {
-				//end screen of actual game
+				//level 4 of actual game
 			} else if (current_level == 12) {
-				//outro of tvga
+				//level 5 of actual game
 			} else if (current_level == 13) {
+				//end screen of actual game
+			} else if (current_level == 14) {
+				//outro of tvga
+			} else if (current_level == 15) {
 				//credit screen kai game ends
 			}
 		}

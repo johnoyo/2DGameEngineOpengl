@@ -32,6 +32,7 @@ public:
 	std::vector<std::vector<Player>> list;
 
 	std::vector<Player> enemies_list;
+	std::vector<Player> enemies_list1;
 	std::vector<Player> collectible_list;
 	std::vector<Player> collectible_list1;
 	std::vector<Player> custom_sprite_list;

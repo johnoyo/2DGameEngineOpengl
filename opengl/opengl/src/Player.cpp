@@ -58,20 +58,20 @@ void Player::fix_position(glm::vec2 new_pos)
 	teleport = true;
 }
 
-void Player::set_custom_position(glm::vec2 position, float width, float height, float offset)
+void Player::set_custom_position(glm::vec2 position, float width, float height1, float height2, float offset)
 {
-	custom_position_0 = { position.x + offset, position.y };
-	custom_position_1 = { position.x + width,  position.y };
-	custom_position_2 = { position.x + width,  position.y + height };
-	custom_position_3 = { position.x + offset, position.y + height };
+	custom_position_0 = { position.x + offset, position.y + height1 };
+	custom_position_1 = { position.x + width,  position.y + height1 };
+	custom_position_2 = { position.x + width,  position.y + height2 };
+	custom_position_3 = { position.x + offset, position.y + height2 };
 }
 
-void Player::set_custom_position(glm::vec2 position, float width, float height, float offset, float offset1)
+void Player::set_custom_position(glm::vec2 position, float width, float height, float offset1)
 {
-	custom_position_0 = { position.x + offset, position.y };
+	custom_position_0 = { position.x, position.y };
 	custom_position_1 = { position.x + width + offset1,  position.y };
 	custom_position_2 = { position.x + width + offset1,  position.y + height };
-	custom_position_3 = { position.x + offset, position.y + height };
+	custom_position_3 = { position.x, position.y + height };
 }
 
 void Player::respawn(glm::vec2 new_pos)
