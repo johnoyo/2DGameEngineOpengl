@@ -62,7 +62,7 @@ void Renderer2D::Initialize(Vertex_Buffer buffer, Index_Buffer index_buffer, Ort
 	GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(vp)));
 }
 
-void Renderer2D::Render(Vertex_Buffer buffer, Orthographic_Camera m_Camera)
+void Renderer2D::Render(Vertex_Buffer buffer, Orthographic_Camera m_Camera, unsigned int current_index)
 {
 	Update_Camera_Uniform(m_Camera);
 
@@ -74,7 +74,7 @@ void Renderer2D::Render(Vertex_Buffer buffer, Orthographic_Camera m_Camera)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	unsigned int i = 0;
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < current_index; i++) {
 		GLCall(glBindTextureUnit(i, texture_slot[i]));
 	}
 	

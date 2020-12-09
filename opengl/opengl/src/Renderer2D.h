@@ -8,7 +8,7 @@
 class Renderer2D {
 public:
 	void Initialize(Vertex_Buffer buffer, Index_Buffer index_buffer, Orthographic_Camera m_Camera);
-	void Render(Vertex_Buffer buffer, Orthographic_Camera m_Camera);
+	void Render(Vertex_Buffer buffer, Orthographic_Camera m_Camera, unsigned int current_index);
 	void Clear();
 	void Upadte_Index_Buffer(unsigned int size, Index_Buffer index_buffer);
 	unsigned int *Get_Texture_Slot();

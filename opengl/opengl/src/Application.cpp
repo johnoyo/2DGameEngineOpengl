@@ -10,12 +10,6 @@
 #include "Game.h"
 #include "Game_Instance.h"
 
-//void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-//{
-//	if (key == GLFW_KEY_E && action == GLFW_PRESS)
-//		std::cout << key << std::endl;
-//}
-
 int main(void)
 {
 
@@ -39,12 +33,11 @@ int main(void)
 	int refresh_rate = mode->refreshRate;
 	std::cout << mode->refreshRate << "\n";
 
-	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "The Great Machine's Escape", glfwGetPrimaryMonitor(), NULL); 
+	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "My VGA 2020", glfwGetPrimaryMonitor(), NULL); 
 
 	
 #endif	
 
-	//glfwSetKeyCallback(window, key_callback);
 	if (!window)
 	{
 		glfwTerminate();
@@ -90,7 +83,7 @@ int main(void)
 		}
 		
 		// - Render at maximum possible frames
-		game.renderer.Render(game.buffer, game.m_Camera);
+		game.renderer.Render(game.buffer, game.m_Camera, game.texture_manager.current_index);
 		//game.render();
 		frames++;
 
