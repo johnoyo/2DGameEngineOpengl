@@ -48,14 +48,16 @@ public:
 		texture_manager.Load_Texture(renderer, "res/textures/start_screen_4.png");
 		texture_manager.Load_Texture(renderer, "res/textures/start_screen_5.png");
 		texture_manager.Load_Texture(renderer, "res/textures/main_menu_screen.png");
+		texture_manager.Load_Texture(renderer, "res/textures/win_screen.png");
+		texture_manager.Load_Texture(renderer, "res/textures/end_screen.png");
 
 
 		Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_1.png"));
 		
 
-		SoundEngine->play2D("res/audio/breakout.mp3", true);
+		SoundEngine->play2D("res/audio/awesomeness.wav", true);
 		p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
-
+		
 		//m_Camera.Set_Position({ p1.get_position().x - 945.0f / 2.0f, p1.get_position().y - p1.get_scale(), 0.0f });
 		line = Line(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x , buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + 100.0f, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y);
 
@@ -100,6 +102,8 @@ public:
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) {
 				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/main_menu_screen.png"));
+				SoundEngine->stopAllSounds();
+				SoundEngine->play2D("res/audio/Xenocity_Digital_Acid_HD.mp3", true);
 			}
 		}
 		else if (current_level == 6) {
@@ -168,8 +172,39 @@ public:
 				
 			}
 		}
-		else
-		{
+		else if (current_level == 11) {
+			//end screen of actual game
+			m_Camera.Set_Position({ 0.0f, 0.0f, 0.0f });
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE)) {
+				std::cout << "Changing level TO VGA OUTRO\n";
+				Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/end_screen.png"));
+				SoundEngine->stopAllSounds();
+				SoundEngine->play2D("res/audio/awesomeness.wav", true);
+			}
+			else if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE)) 
+			{
+				std::cout << "Game Over!\n";
+				damage = 0;
+				uses = 0;
+				score = 0;
+				coins_collected = 0;
+				amount_x = 0.0f;
+				amount_y = 0.0f;
+				x = 0.0f;
+				y = 0.0f;
+				y1 = 0.0f;
+				Game_Over(texture_manager.Find("res/textures/main_menu_screen.png"));
+				current_level = 6;
+				SoundEngine->stopAllSounds();
+				SoundEngine->play2D("res/audio/Xenocity_Digital_Acid_HD.mp3", true);
+			}
+
+		}
+		else if (current_level == 12) {
+			//outro of tvga
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_ESCAPE))
+				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
+		} else {
 
 			if (Is_Grounded_y) {
 				if (scale_h < 0) {
@@ -205,10 +240,11 @@ public:
 			else scale_v = p1.get_scale();
 
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE) && uses != 5) {
+				SoundEngine->play2D("res/audio/Laser-weapon2.mp3");
 
 				uses++;
 				custom_sprite_list.at(1).custom_position_1.x -= 27.0f;
-				custom_sprite_list.at(1).custom_position_2.x -= 27.0f;
+				custom_sprite_list.at(1).custom_position_2.x -= 27.0f; 
 
 				if (scale_h > 0) {
 					line = Line(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x - 200.0f, buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y);
@@ -233,6 +269,7 @@ public:
 
 			//if (scale_h > 0) p1.set_texture_id(texture_manager.Find("res/textures/robot_reversed.png"));
 			//else p1.set_texture_id(texture_manager.Find("res/textures/robot.png"));
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_W)) SoundEngine->play2D("res/audio/Jump4.mp3");
 
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_A)) p1.set_texture_id(texture_manager.Find("res/textures/player_l.png"));
 
@@ -314,6 +351,7 @@ public:
 
 				if (check_if_obj_collides_with_obj(p1, enemies_list.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
 					damage++;
+					SoundEngine->play2D("res/audio/Playersounds_Track6_Hurt2.wav");
 				}
 
 			}
@@ -340,6 +378,7 @@ public:
 					y = 0.0f;
 					y1 = 0.0f;
 					coins_collected = 0;
+					SoundEngine->play2D("res/audio/Playersounds_Track6_Hurt2.wav");
 				}
 
 			}
@@ -350,6 +389,7 @@ public:
 					collectible_list.at(i).despawn();
 					score++;
 					coins_collected++;
+					SoundEngine->play2D("res/audio/coin02.wav");
 				}
 
 			}
@@ -359,6 +399,7 @@ public:
 				if (check_if_obj_collides_with_obj(p1, collectible_list1.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
 					collectible_list1.at(i).despawn();
 					if(uses > 0) uses--;
+					SoundEngine->play2D("res/audio/coin02.wav");
 
 				}
 
@@ -433,6 +474,8 @@ public:
 					y = 0.0f;
 					y1 = 0.0f;
 					coins_collected = 0;
+					SoundEngine->stopAllSounds();
+					SoundEngine->play2D("res/audio/S31_Night_Prowler.ogg", true);
 				}
 			} else if (current_level == 9) {
 				//level 2 of actual game
@@ -466,13 +509,15 @@ public:
 					score = 0;
 					uses = 0;
 					damage = 0;
+					SoundEngine->stopAllSounds();
+					SoundEngine->play2D("res/audio/Cyberpunk_Moonlight_Sonata_v2.mp3", true);
 				}
 			} else if (current_level == 10) {
 				//level 3 of actual game
 
 				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
 
-					std::cout << "Changing level\n";
+					/*std::cout << "Changing level\n";
 					amount_x = 0.0f;
 					amount_y = 0.0f;
 					Next_Level.despawn();
@@ -486,19 +531,12 @@ public:
 					Next_Level.despawn();
 					score = 0;
 					uses = 0;
-					damage = 0;
+					damage = 0;*/
+
+					
+					Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/win_screen.png"));
 				}
-			} else if (current_level == 11) {
-				//level 4 of actual game
-			} else if (current_level == 12) {
-				//level 5 of actual game
-			} else if (current_level == 13) {
-				//end screen of actual game
-			} else if (current_level == 14) {
-				//outro of tvga
-			} else if (current_level == 15) {
-				//credit screen kai game ends
-			}
+			} 
 		}
 	}
 };
