@@ -51,9 +51,7 @@ public:
 		texture_manager.Load_Texture(renderer, "res/textures/win_screen.png");
 		texture_manager.Load_Texture(renderer, "res/textures/end_screen.png");
 
-
 		Load_Menu(945.0f, 540.0f, texture_manager.Find("res/textures/start_screen_1.png"));
-		
 
 		SoundEngine->play2D("res/audio/awesomeness.wav", true);
 		p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
@@ -275,7 +273,7 @@ public:
 
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_D)) p1.set_texture_id(texture_manager.Find("res/textures/player_r.png"));
 
-			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_R)) {
+			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_R) || p1.get_position().y < -540.0f) {
 				std::cout << "Restarting level\n";
 				amount_x = 0.0f;
 				amount_y = 0.0f;
