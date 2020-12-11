@@ -524,6 +524,19 @@ How is the Collision supposed to work now:
 	3d) Update the vertex buffer with the new y-position of the player
 
 4) Render
+
+In short:
+- move player
+- update buffer only for x-axis movement
+- collision handling and correction on x-axis
+	- update player x-position (if we have collision)
+	- update buffer only for x-axis with new position (if we have collision)
+- update buffer only for y-axis movement
+- collision detection and correction on y-axis
+	- update player y-position (if we have collision)
+	- update buffer only for y-axis with new position (if we have collision)
+- render
+
 */
 
 /* 
@@ -559,16 +572,16 @@ void Game::handle_collision(float scale_h, float scale_v, float amount_x, float 
 	p1.set_teleport(false);
 }
 
-void Game::handle_collision1(float amount_x, float amount_y)
+void Game::handle_collision_new()
 {
 	/* change the position of the player in the x-axis according to input */
-	update_player_position(amount_x, 0.0f);
+	update_player_position(p1.amount_h, 0.0f);
 	/* Here we change the position x of p1 if the there is collision */
 	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), &Is_Grounded_x, &Collides_x, X_AXIS);
 	//buffer.Set_Buffer(collision_manager.Check_For_Collisions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), &Is_Grounded_x, &Collides_x, X_AXIS));
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
-	update_player_position(0.0f, amount_y);
+	update_player_position(0.0f, p1.amount_v);
 	/* Here we change the position y of p1 if the there is collision */
 	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), &Is_Grounded_y, &Collides_y, Y_AXIS);
 	//buffer.Set_Buffer(collision_manager.Check_For_Collisions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), &Is_Grounded_y, &Collides_y, Y_AXIS));

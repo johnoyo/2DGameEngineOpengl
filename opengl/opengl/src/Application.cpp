@@ -78,7 +78,7 @@ int main(void)
 			game.update();   // - Update function
 			game.update_buffer();
 			//game.handle_collision(game.scale_h, game.scale_v, game.get_player().amount_h, game.get_player().amount_v, 0);
-			game.handle_collision1(game.get_player().amount_h, game.get_player().amount_v);
+			game.handle_collision_new();
 			updates++;
 			deltaTime--;
 		}

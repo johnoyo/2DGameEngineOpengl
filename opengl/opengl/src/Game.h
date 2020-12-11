@@ -108,7 +108,7 @@ public:
 	void update_player_position_y();
 	void clean();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
-	void handle_collision1(float amount_x, float amount_y);
+	void handle_collision_new();
 	void update_buffer();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

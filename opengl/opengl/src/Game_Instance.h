@@ -383,7 +383,7 @@ public:
 
 			for (int i = 0; i < enemies_list.size(); i++) {
 
-				if (check_if_obj_collides_with_obj(p1, enemies_list.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, enemies_list.at(i), buffer.Get_Buffer())) {
 					damage++;
 					SoundEngine->play2D("res/audio/Playersounds_Track6_Hurt2.wav");
 				}
@@ -392,7 +392,7 @@ public:
 
 			for (int i = 0; i < enemies_list1.size(); i++) {
 
-				if (check_if_obj_collides_with_obj(p1, enemies_list1.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, enemies_list1.at(i), buffer.Get_Buffer())) {
 					std::cout << "Restarting level\n";
 					amount_x = 0.0f;
 					amount_y = 0.0f;
@@ -419,7 +419,7 @@ public:
 
 			for (int i = 0; i < collectible_list.size(); i++) {
 
-				if (check_if_obj_collides_with_obj(p1, collectible_list.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, collectible_list.at(i), buffer.Get_Buffer())) {
 					collectible_list.at(i).despawn();
 					score++;
 					coins_collected++;
@@ -430,7 +430,7 @@ public:
 
 			for (int i = 0; i < collectible_list1.size(); i++) {
 
-				if (check_if_obj_collides_with_obj(p1, collectible_list1.at(i), buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, collectible_list1.at(i), buffer.Get_Buffer())) {
 					collectible_list1.at(i).despawn();
 					if(uses > 0) uses--;
 					SoundEngine->play2D("res/audio/coin02.wav");
@@ -487,7 +487,7 @@ public:
 				enemies_list1.at(0).change_position({ x, 0.0f });
 
 
-				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, Next_Level, buffer.Get_Buffer())) {
 
 					std::cout << "Changing level\n";
 					amount_x = 0.0f;
@@ -526,7 +526,7 @@ public:
 				for (int i = 10; i < 18; i++)
 					enemies_list1.at(i).change_position({ 0.0f, y1 });
 
-				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, Next_Level, buffer.Get_Buffer())) {
 
 					std::cout << "Changing level\n";
 					amount_x = 0.0f;
@@ -549,7 +549,7 @@ public:
 			} else if (current_level == 10) {
 				//level 3 of actual game
 
-				if (check_if_obj_collides_with_obj(p1, Next_Level, buffer.Get_Buffer(), buffer.Get_Size())) {
+				if (collision_manager.Check_If_Obj_Collides_With_Obj(p1, Next_Level, buffer.Get_Buffer())) {
 
 					/*std::cout << "Changing level\n";
 					amount_x = 0.0f;

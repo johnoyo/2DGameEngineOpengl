@@ -152,7 +152,7 @@ inline bool Collision_Manager::check_corner_br_tl_bool(float p_x, float p_y, flo
 }
 
 inline bool Collision_Manager::check_corner_tr_bl_bool(float p_x, float p_y, float l_x, float l_y, float l_x1, float l_y1) {
-	if (p_y >= l_y && p_x >= l_x && p_y <= l_y1 && p_x <= l_x1) {
+	if (p_y >= l_y-0.5f && p_x >= l_x && p_y <= l_y1 && p_x <= l_x1) {
 		//std::cout << "--top right--\n";
 		return true;
 	}
@@ -160,7 +160,7 @@ inline bool Collision_Manager::check_corner_tr_bl_bool(float p_x, float p_y, flo
 }
 
 inline bool Collision_Manager::check_corner_tl_br_bool(float p_x, float p_y, float l_x, float l_y, float l_x1, float l_y1) {
-	if (p_y >= l_y && p_x <= l_x && p_y <= l_y1 && p_x >= l_x1) return true;
+	if (p_y >= l_y-0.5f && p_x <= l_x && p_y <= l_y1 && p_x >= l_x1) return true;
 	return false;
 }
 
