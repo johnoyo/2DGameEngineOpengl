@@ -1,12 +1,5 @@
 #include "Game.h"
 
-//void Game::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-//{
-//	if (key == GLFW_KEY_E && action == GLFW_PRESS) std::cout << key << std::endl;
-//		SoundEngine->play2D("res/audio/beep.mp3", true);
-//}
-
-
 Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate) 
 	: window(win), refresh_rate(refresh_rate), tile_size(character_scale), m_Camera(0.0f, width, 0.0f, height)
 {
@@ -17,7 +10,6 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 	{
 		std::cout << "Error: Could not create Sound Engine" << std::endl;
 	}
-	/*glfwSetKeyCallback(get_window(), f);*/
 
 	/* TODO: make this better */
 	total_buffer_size = (100 * 100) * 4;
@@ -27,27 +19,6 @@ Game::Game(std::string& level_path, GLFWwindow *win, float width, float height, 
 
 	renderer.Initialize(buffer, index_buffer, m_Camera);
 	texture_manager.Init_Transparent_Texture(renderer);
-
-	
-
-	std::cout << renderer.Get_Texture_Slot()[0] << ", " << renderer.Get_Texture_Slot()[1] << ", " << renderer.Get_Texture_Slot()[2] << "\n";
-
-}
-
-
-
-void Game::Init_Transparent_Texture() {
-
-	/* 1x1 whitetexture */
-	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &white_texture_id));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-	uint32_t color = 0xffffffff;
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
-
-	texture_slot[0] = white_texture_id;
 
 }
 
@@ -64,7 +35,6 @@ void Game::Load_Menu(float width, float height, float text_id) {
 	index_buffer.Clean();
 	index_buffer.Make_Indecies(buffer.Get_Size());
 	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
-	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 	current_level++;
 
 }
@@ -77,7 +47,6 @@ void Game::Game_Over(float text_id) {
 	index_buffer.Clean();
 	index_buffer.Make_Indecies(buffer.Get_Size());
 	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
-	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
 }
 
 
@@ -96,13 +65,7 @@ void Game::Load_Next_Level(std::string& level_path, float width, float height, f
 	index_buffer.Make_Indecies(buffer.Get_Size());
 	renderer.Upadte_Index_Buffer(buffer.Get_Size(), index_buffer);
 
-	//GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
-
-	/*p1 = Player(renderer.Get_Texture_Slot()[0] - 1, buffer.Get_Buffer()[buffer.Get_Size() - 1].position, character_scale - 1.0f);
-	p1.set_buffer_index(buffer.Get_Size() - 4, buffer.Get_Size() - 3, buffer.Get_Size() - 2, buffer.Get_Size() - 1);*/
-
 	current_level++;
-
 }
 
 void Game::Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id, glm::vec4 color) {
@@ -345,6 +308,7 @@ void Game::update_buffer()
 		p1.set_teleport(false);
 	}
 	
+	
 	buffer.Get_Buffer()[p1.get_buffer_index()[0]].tex_id = p1.get_texture_id();
 	buffer.Get_Buffer()[p1.get_buffer_index()[1]].tex_id = p1.get_texture_id();
 	buffer.Get_Buffer()[p1.get_buffer_index()[2]].tex_id = p1.get_texture_id();
@@ -492,41 +456,6 @@ void Game::update_buffer()
 	
 }
 
-void Game::Update_Camera_Uniform() {
-	glm::mat4 vp = m_Camera.Get_View_Projection_Matrix();
-	GLCall(int location1 = glGetUniformLocation(shader, "u_VP"));
-	if (location1 == -1) {
-		std::cout << "Uniform not found!!!\n";
-	}
-	GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(vp)));
-}
-
-void Game::render()
-{
-	//update_buffer();
-	Update_Camera_Uniform();
-
-	/* set dynamic vertex buffer */
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb));
-	GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, buffer.Get_Size() * sizeof(Vertex_Array), buffer.Get_Buffer()));
-
-	/* Render here */
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	GLCall(glBindTextureUnit(0, texture_slot[0]));
-	GLCall(glBindTextureUnit(1, texture_slot[1]));
-	GLCall(glBindTextureUnit(2, texture_slot[2]));
-	GLCall(glBindTextureUnit(3, texture_slot[3]));
-	GLCall(glBindTextureUnit(4, texture_slot[4]));
-	GLCall(glBindTextureUnit(5, texture_slot[5]));
-	GLCall(glBindTextureUnit(6, texture_slot[6]));
-	GLCall(glBindTextureUnit(7, texture_slot[7]));
-	GLCall(glBindTextureUnit(8, texture_slot[8]));
-	GLCall(glBindTextureUnit(9, texture_slot[9]));
-
-	GLCall(glDrawElements(GL_TRIANGLES, (buffer.Get_Size() / 4) * 6, GL_UNSIGNED_INT, NULL));
-}
-
 void Game::clean()
 {
 	std::cout << "Cleaning..." << std::endl;
@@ -534,68 +463,6 @@ void Game::clean()
 	if (buffer.Get_Buffer() != NULL) free(buffer.Get_Buffer());
 	if (index_buffer.Get_Index_Buffer() != NULL) free(index_buffer.Get_Index_Buffer());
 	if (world != NULL) free(world);
-}
-
-
-void Game::handle_opengl()
-{
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-	/* vertex array object */
-	GLCall(glGenVertexArrays(1, &vao));
-	GLCall(glBindVertexArray(vao));
-
-	/* vertex buffer */
-	GLCall(glGenBuffers(1, &vb));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, total_buffer_size * sizeof(struct Vertex_Array), nullptr, GL_DYNAMIC_DRAW));
-
-
-	/* vertex attrib positions*/
-	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vertex_Array), (const void*)offsetof(Vertex_Array, position)));
-
-	/* vertex attrib colors*/
-	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(struct Vertex_Array), (const void*)offsetof(Vertex_Array, color)));
-
-	/* vertex attrib texture coordinates*/
-	GLCall(glEnableVertexAttribArray(2));
-	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vertex_Array), (const void*)offsetof(Vertex_Array, tex_coord)));
-
-	/* vertex attrib texture id*/
-	GLCall(glEnableVertexAttribArray(3));
-	GLCall(glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(struct Vertex_Array), (const void*)offsetof(Vertex_Array, tex_id)));
-
-	/* index buffer */
-	GLCall(glGenBuffers(1, &ib));
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (buffer.Get_Size() / 4) * 6 * sizeof(unsigned int), index_buffer.Get_Index_Buffer(), GL_STATIC_DRAW));
-
-	/* shaders */
-	ShaderProgramSource shaderSource = ParseShader("res/shaders/Basic.shader");
-	shader = CreateShader(shaderSource.VertexSource, shaderSource.FragmentSource);
-	GLCall(glUseProgram(shader));
-
-	GLCall(auto loc = glGetUniformLocation(shader, "u_textures"));
-	int samplers[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	GLCall(glUniform1iv(loc, 10, samplers));
-
-	//glm::vec3 translationA(0, 0, 0);
-	//glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
-	//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-	//glm::mat4 projection = glm::ortho(0.0f, 945.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-	//glm::mat4 mvp = projection * view * model;
-
-	glm::mat4 vp = m_Camera.Get_View_Projection_Matrix();
-
-	GLCall(int location1 = glGetUniformLocation(shader, "u_VP"));
-	if (location1 == -1) {
-		std::cout << "Uniform not found!!!\n";
-	}
-	//GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, &mvp[0][0]));
-	GLCall(glUniformMatrix4fv(location1, 1, GL_FALSE, glm::value_ptr(vp)));
 }
 
 void Game::update_player_position(float amount_x, float amount_y)
@@ -612,7 +479,6 @@ void Game::update_player_position(float amount_x, float amount_y)
 	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.y += amount_y;
 
 }
-
 
 void Game::update_player_position_x()
 {
@@ -635,6 +501,46 @@ void Game::update_player_position_y()
 }
 
 
+/*
+How is the Collision supposed to work now:
+1) I move the player in the x and y axis according to input
+
+2) Handle movement in the x-axis
+
+	2a) Update the vertex buffer with amount player has move on x-axis
+	2b) Check the player index in the buffer(i.e the player positions) if 
+		he collides with any other tile
+	2c) If he collides, change the player x-position so they are just touching 
+		with the colliding tile
+	2d) Update the vertex buffer with the new x-position of the player
+
+3) Handle movement in the y-axis
+
+	3a) Update the vertex buffer with amount player has move on y-axis
+	3b) Check the player index in the buffer(i.e the player positions) if 
+		he collides with any other tile
+	3c) If he collides, change the player y-position so they are just touching 
+		with the colliding tile
+	3d) Update the vertex buffer with the new y-position of the player
+
+4) Render
+*/
+
+/* 
+TODO: IMPORTANT!!! I FOUND THE BUG WHERE THE PLAYER FALLS THROUGH THE GROUND.
+IT HAPPENS WHEN ALL THE CORNERS OF THE PLAYER ARE INSIDE A TILE(SINCE THE PLAYER SCALE IS SMALLER BY 1)
+
+ILLUSTARTION:
+								ppp
+								ppp
+								ppp
+							   ggggg
+							   ggggg
+							   ggggg
+FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+
+
 void Game::handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis)
 {
 	/* change the position of the player in the x-axis (i.e last quad in vertex buffer) according to input */
@@ -651,6 +557,21 @@ void Game::handle_collision(float scale_h, float scale_v, float amount_x, float 
 	buffer.Set_Buffer(check_for_collitions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), scale_v, &Is_Grounded_y, &Collides_y, Y_AXIS));
 
 	p1.set_teleport(false);
+}
+
+void Game::handle_collision1(float amount_x, float amount_y)
+{
+	/* change the position of the player in the x-axis according to input */
+	update_player_position(amount_x, 0.0f);
+	/* Here we change the position x of p1 if the there is collision */
+	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), &Is_Grounded_x, &Collides_x, X_AXIS);
+	//buffer.Set_Buffer(collision_manager.Check_For_Collisions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), &Is_Grounded_x, &Collides_x, X_AXIS));
+
+	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
+	update_player_position(0.0f, amount_y);
+	/* Here we change the position y of p1 if the there is collision */
+	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), &Is_Grounded_y, &Collides_y, Y_AXIS);
+	//buffer.Set_Buffer(collision_manager.Check_For_Collisions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), &Is_Grounded_y, &Collides_y, Y_AXIS));
 }
 
 void Game::convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch)

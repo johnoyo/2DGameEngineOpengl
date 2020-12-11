@@ -50,6 +50,16 @@ void Player::change_position(glm::vec2 new_pos)
 	amount_v = new_pos.y;
 }
 
+void Player::change_position_x(float new_pos)
+{
+	position.x += new_pos;
+}
+
+void Player::change_position_y(float new_pos)
+{
+	position.y += new_pos;
+}
+
 
 void Player::fix_position(glm::vec2 new_pos)
 {

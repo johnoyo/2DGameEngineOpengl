@@ -12,6 +12,7 @@
 #include "Renderer2D.h"
 #include "Texture_Manager.h"
 #include "Input_Manager.h"
+#include "Collision_Manager.h"
 #include <irrKlang.h>
 #include <functional>
 //#pragma comment(lib, "irrKlang.lib")
@@ -27,6 +28,7 @@ public:
 	Texture_Manager texture_manager;
 	Input_Manager input_manager;
 	Orthographic_Camera m_Camera;
+	Collision_Manager collision_manager;
 	irrklang::ISoundEngine* SoundEngine;
 
 	std::vector<std::vector<Player>> list;
@@ -80,7 +82,6 @@ private:
 public:
 	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
 	~Game();
-	void Init_Transparent_Texture();
 	void load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
 	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
@@ -105,10 +106,12 @@ public:
 	void update_player_position(float amount_x, float amount_y);
 	void update_player_position_x();
 	void update_player_position_y();
-	void render();
 	void clean();
 	void handle_collision(float scale_h, float scale_v, float amount_x, float amount_y, unsigned int axis);
+	void handle_collision1(float amount_x, float amount_y);
 	void update_buffer();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
 	std::pdd lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
@@ -122,11 +125,7 @@ public:
 	bool is_Edge_Connected(float x1, float y1, float x2, float y2);
 	sEdge Find_Next_Edge(sEdge e2);
 	sEdge Find_Starting_Edge(float x, float y);
-
-
-protected:
-	void Update_Camera_Uniform();
-	void handle_opengl();
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 

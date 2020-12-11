@@ -4,6 +4,7 @@
 
 class Vertex_Buffer {
 public:
+	
 	void Initialize(int total_buffer_size);
 	void New_Position(unsigned int indx, float width, float height);
 	void New_Color(unsigned int indx, float r, float g, float b, float a);
@@ -16,6 +17,8 @@ public:
 	void Set_Size(unsigned int size);
 	unsigned int Get_Total_Size();
 	void Reset();
+
+	friend class Game;
 
 private:
 	struct Vertex_Array* buffer = NULL;

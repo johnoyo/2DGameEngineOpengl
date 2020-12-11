@@ -16,10 +16,10 @@ int main(void)
 	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
-#if 1
+#if 0
 	/* Create a windowed mode window and its OpenGL context */
 	GLFWwindow* window;
-	window = glfwCreateWindow(945, 540, "The Great Machine's Escape", NULL, NULL);
+	window = glfwCreateWindow(945, 540, "My VGA 2020", NULL, NULL);
 	int refresh_rate = 144;
 #else
 	
@@ -77,7 +77,8 @@ int main(void)
 		while (deltaTime >= 1.0) {
 			game.update();   // - Update function
 			game.update_buffer();
-			game.handle_collision(game.scale_h, game.scale_v, game.amount_x, game.amount_y, 0);
+			//game.handle_collision(game.scale_h, game.scale_v, game.get_player().amount_h, game.get_player().amount_v, 0);
+			game.handle_collision1(game.get_player().amount_h, game.get_player().amount_v);
 			updates++;
 			deltaTime--;
 		}

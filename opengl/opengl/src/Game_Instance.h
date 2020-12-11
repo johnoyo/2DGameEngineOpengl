@@ -11,8 +11,10 @@ class Game_Instance : public Game {
 
 public:
 	float amount_x = 0.0f, amount_y = 0.0f, amount_xx = 0.0f, amount_yy = 0.0f, scale_h = 0.0f, scale_v = 0.0f;
-	float x = 0.0f, y = 0.0f, y1 = 0.0f, acc = 0.0f;
-	int hor = -1;
+	float x = 0.0f, y = 0.0f, y1 = 0.0f, acc = 0.0f, acc1 = 0.0f;
+	int hor = -1, ver = -1;
+
+	bool start_slowdown_r = false, start_slowdown_l = false;
 
 	double previous_time1 = glfwGetTime();
 	int frame_count1 = 0;
@@ -204,34 +206,68 @@ public:
 				glfwSetWindowShouldClose(get_window(), GLFW_TRUE);
 		} else {
 
-			if (Is_Grounded_y) {
-				if (scale_h < 0) {
-					if (amount_x > 0) amount_x -= 0.5f;
-					else amount_x = 0;
-				} else {
-					if (amount_x < 0) amount_x += 0.5f;
-					else amount_x = 0;
-				}
+			/*if (input_manager.GetKeyRelease(get_window(), GLFW_KEY_D)) {
+				std::cout << "D\n";
+				start_slowdown_r = true;
+			} 
+
+			if(start_slowdown_r && amount_x > 0) amount_x -= 0.5f;
+			else {
+				amount_x = 0;
+				start_slowdown_r = false;
+			}
+
+			if (input_manager.GetKeyRelease(get_window(), GLFW_KEY_A)) {
+				std::cout << "A\n";
+				start_slowdown_l = true;
+			}
+			if (start_slowdown_l && amount_x < 0) amount_x += 0.5f;
+			else {
+				amount_x = 0;
+				start_slowdown_l = false;
+			}*/
+			if (scale_h < 0) {
+				if (amount_x > 0) amount_x -= 0.5f;
+				else amount_x = 0;
 			}
 			else {
-				if (scale_h < 0) {
-					if (amount_x > 0) amount_x -= 0.5f;
-					else amount_x = 0;
-				}
-				else {
-					if (amount_x < 0) amount_x += 0.5f;
-					else amount_x = 0;
-				}
+				if (amount_x < 0) amount_x += 0.5f;
+				else amount_x = 0;
 			}
+			/*if (scale_v < 0) {
+				if (amount_y > 0) amount_y -= 0.5f;
+				else amount_y = 0;
+			}
+			else {
+				if (amount_y < 0) amount_y += 0.5f;
+				else amount_y = 0;
+			}*/
 
 			/* Check for input on x-axis */
-			hor = handle_input_hor(get_window(), &p1, 5.0f, acc, p1.get_scale(), &amount_x, buffer.Get_Size(), &scale_h, Is_Grounded_y, refresh_rate);
 
-			/* Check for input on y-axis */
-			handle_input_vert(get_window(), &p1, p1.get_scale(), &amount_y, buffer.Get_Size(), &scale_v, Is_Grounded_y, Collides_y, refresh_rate);
+			hor = handle_input_hor(get_window(), &p1, 5.0f, acc, p1.get_scale(), &amount_x, buffer.Get_Size(), &scale_h, Is_Grounded_y, refresh_rate);
 
 			if (hor == 0) acc = acc + 0.1f;
 			else acc = 0.0f;
+
+			if (amount_x > 5.0f) amount_x = 5.0f;
+			if (amount_x < -5.0f) amount_x = -5.0f;
+
+			//p1.change_position({ amount_x, 0.0f });
+
+			/* Check for input on y-axis */
+			//ver = handle_input_vert_no_gravity(get_window(), &p1, 5.0f, acc1, p1.get_scale(), &amount_y, buffer.Get_Size(), &scale_v, true, refresh_rate);
+
+			
+			handle_input_vert(get_window(), &p1, p1.get_scale(), &amount_y, buffer.Get_Size(), &scale_v, Is_Grounded_y, Collides_y, refresh_rate);
+
+			/*if (ver == 0) acc1 = acc1 + 0.1f;
+			else acc1 = 0.0f;
+
+			if (amount_y > 5.0f) amount_y = 5.0f;
+			if (amount_y < -5.0f) amount_y = -5.0f;*/
+
+			p1.change_position({ amount_x, amount_y });
 
 			/* TODO: find out why "scale_v" it doesnt work by reference */
 			if (amount_y > 0) scale_v = -p1.get_scale();
@@ -302,15 +338,15 @@ public:
 			
 			
 
-			if (amount_x > 5.0f) amount_x = 5.0f;
-			if (amount_x < -5.0f) amount_x = -5.0f;
 
 
-			m_Camera.Set_Position_x(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f));
-			Background.fix_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 0.0f }));
-			custom_sprite_list.at(1).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 520.0f }), 0.0f, 20.0f, coins_collected * 27.0f);
-			custom_sprite_list.at(2).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) + 81.0f , 520.0f }), 135.0f, 20.0f, -uses*27.0f);
-			custom_sprite_list.at(3).set_custom_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) + 216.0f , 520.0f }), 823.0f, 20.0f, -damage*10.0f);
+			//m_Camera.Set_Position_x(buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f));
+			m_Camera.Set_Position_x(p1.get_position().x + (-945.0f / 2.0f));
+			//Background.fix_position(glm::vec2({ buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x + (-945.0f / 2.0f) , 0.0f }));
+			Background.fix_position(glm::vec2(p1.get_position().x + (-945.0f / 2.0f), 0.0f));
+			custom_sprite_list.at(1).set_custom_position(glm::vec2({ p1.get_position().x + (-945.0f / 2.0f) , 520.0f }), 0.0f, 20.0f, coins_collected * 27.0f);
+			custom_sprite_list.at(2).set_custom_position(glm::vec2({ p1.get_position().x + (-945.0f / 2.0f) + 81.0f , 520.0f }), 135.0f, 20.0f, -uses*27.0f);
+			custom_sprite_list.at(3).set_custom_position(glm::vec2({ p1.get_position().x + (-945.0f / 2.0f) + 216.0f , 520.0f }), 823.0f, 20.0f, -damage*10.0f);
 
 			if (damage * 10 > 823.0f) {
 				/*std::cout << "Game Over!\n";

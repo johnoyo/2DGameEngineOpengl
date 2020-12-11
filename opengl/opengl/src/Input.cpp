@@ -11,9 +11,9 @@ int handle_input_hor(GLFWwindow* window, Player *p, float speed, float acc, floa
 
 		if (is_grounded) 
 			*amount_x = speed * acc;
-		else *amount_x = (speed - 1);
+		else *amount_x = (speed - 1.0f);
 		
-		(*p).change_position(glm::vec2(*amount_x, 0.0f));
+		//(*p).change_position(glm::vec2(*amount_x, 0.0f));
 		return 0;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
@@ -22,10 +22,10 @@ int handle_input_hor(GLFWwindow* window, Player *p, float speed, float acc, floa
 
 		if (is_grounded) 
 			*amount_x = -speed * acc;
-		else *amount_x = -(speed - 1);
+		else *amount_x = -(speed - 1.0f);
 
 
-		(*p).change_position(glm::vec2(*amount_x, 0.0f));
+		//(*p).change_position(glm::vec2(*amount_x, 0.0f));
 		return 0;
 	}
 
@@ -42,9 +42,9 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float speed, flo
 		*scale = -player_scale;
 
 		if (is_grounded) *amount_y = speed * acc;
-		else *amount_y = (speed - 1);
+		else *amount_y = (speed - 1.0f);
 
-		(*p).change_position(glm::vec2(0.0f, *amount_y));
+		//(*p).change_position(glm::vec2(0.0f, *amount_y));
 		return 0;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
@@ -52,9 +52,9 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float speed, flo
 		*scale = player_scale;
 
 		if (is_grounded) *amount_y = -speed * acc;
-		else *amount_y = -(speed - 1);
+		else *amount_y = -(speed - 1.0f);
 
-		(*p).change_position(glm::vec2(0.0f, *amount_y));
+		//(*p).change_position(glm::vec2(0.0f, *amount_y));
 		return 0;
 	}
 
@@ -64,19 +64,19 @@ int handle_input_vert_no_gravity(GLFWwindow* window, Player* p, float speed, flo
 int handle_input_vert(GLFWwindow* window, Player *p, float player_scale, float* amount_y, float size, float* scale, bool is_grounded, bool collides, int refresh_rate) {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && is_grounded) {
 		/* std::cout << "Key W pressed\n"; */
-		*amount_y = 3.9+6.8;
+		*amount_y = 3.9f+6.8f;
 
-		(*p).change_position(glm::vec2(0.0f, *amount_y));
+		//(*p).change_position(glm::vec2(0.0f, *amount_y));
 
 		*scale = -player_scale;
 		return 0;
 	}
 	else {
 
-		if (!collides) *amount_y += -0.1*6.8;
-		else  *amount_y = -1.0;
+		if (!collides) *amount_y += -0.1f*6.8f;
+		else  *amount_y = -2.0f;
 
-		(*p).change_position(glm::vec2(0.0f, *amount_y));
+		//(*p).change_position(glm::vec2(0.0f, *amount_y));
 		*scale = player_scale;
 		return 0;
 	}
