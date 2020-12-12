@@ -242,10 +242,12 @@ public:
 				if (amount_y < 0) amount_y += 0.5f;
 				else amount_y = 0;
 			}*/
+			//amount_x = 0;
+			//amount_y = 0;
 
 			/* Check for input on x-axis */
 
-			hor = handle_input_hor(get_window(), &p1, 5.0f, acc, p1.get_scale(), &amount_x, buffer.Get_Size(), &scale_h, Is_Grounded_y, refresh_rate);
+			hor = handle_input_hor(get_window(), &p1, 5.0f, acc, p1.get_scale_x(), &amount_x, buffer.Get_Size(), &scale_h, Is_Grounded_y, refresh_rate);
 
 			if (hor == 0) acc = acc + 0.1f;
 			else acc = 0.0f;
@@ -256,10 +258,10 @@ public:
 			//p1.change_position({ amount_x, 0.0f });
 
 			/* Check for input on y-axis */
-			//ver = handle_input_vert_no_gravity(get_window(), &p1, 5.0f, acc1, p1.get_scale(), &amount_y, buffer.Get_Size(), &scale_v, true, refresh_rate);
+			//ver = handle_input_vert_no_gravity(get_window(), &p1, 5.0f, acc1, p1.get_scale_y(), &amount_y, buffer.Get_Size(), &scale_v, true, refresh_rate);
 
 			
-			handle_input_vert(get_window(), &p1, p1.get_scale(), &amount_y, buffer.Get_Size(), &scale_v, Is_Grounded_y, Collides_y, refresh_rate);
+			handle_input_vert(get_window(), &p1, p1.get_scale_y(), &amount_y, buffer.Get_Size(), &scale_v, Is_Grounded_y, Collides_y, refresh_rate);
 
 			/*if (ver == 0) acc1 = acc1 + 0.1f;
 			else acc1 = 0.0f;
@@ -270,8 +272,8 @@ public:
 			p1.change_position({ amount_x, amount_y });
 
 			/* TODO: find out why "scale_v" it doesnt work by reference */
-			if (amount_y > 0) scale_v = -p1.get_scale();
-			else scale_v = p1.get_scale();
+			if (amount_y > 0) scale_v = -p1.get_scale_y();
+			else scale_v = p1.get_scale_y();
 
 			if (input_manager.GetKeyPress(get_window(), GLFW_KEY_SPACE) && uses != 5) {
 				SoundEngine->play2D("res/audio/Laser-weapon2.mp3");
@@ -443,6 +445,7 @@ public:
 				if (scale_h > 0) p1.set_texture_id(texture_manager.Find("res/textures/player_lw.png"));
 				else p1.set_texture_id(texture_manager.Find("res/textures/player_rw.png"));
 			}
+
 			Repeat_Every(0.3, previous_time1, 
 				[&](void) {
 					if (input_manager.GetKeyDown(get_window(), GLFW_KEY_A, GLFW_PRESS)) {

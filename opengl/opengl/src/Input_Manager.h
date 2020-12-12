@@ -3,7 +3,7 @@
 
 class Input_Manager {
 public:
-	/* Returns true i.e. 1, as long as the specified key is pressed */
+	/* Returns true i.e. 1, as long as the specified key is pressed or released */
 	int GetKeyDown(GLFWwindow* window, int Key_Code, int Mode);
 	/* Returns true i.e. 1, only the moment that the key is pressed */
 	int GetKeyPress(GLFWwindow* window, int Key_Code);

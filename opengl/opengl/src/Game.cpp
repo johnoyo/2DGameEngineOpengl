@@ -221,8 +221,13 @@ void Game::load_level(Vertex_Array* vertex, std::string & level_path, float widt
 			custom_sprite_list.at(i).get_texture_id(), custom_sprite_list.at(i).color);
 	}
 
+	/**
+	* NOTE: if the player size is equal to the tile size, we have bugs. Just dont do that!
+	*/
+
 	/* Player data (position, color, texture) gets added last to the vertex buffer */
-	p1 = Player(5, buffer.Get_Size(), glm::vec2(p.at(s).j * character_scale - 1.0f, p.at(s).i * character_scale - 1.0f), character_scale - 1.0f);
+	p1 = Player(5, buffer.Get_Size(), glm::vec2(p.at(s).j * character_scale - 1.0f, p.at(s).i * character_scale - 1.0f), character_scale - 1.0f, character_scale - 1.0f);
+	p1.fix_position(glm::vec2(p.at(s).j* character_scale - 1.0f, p.at(s).i* character_scale - 1.0f));
 
 	buffer.Fill_Buffer(glm::vec2(p.at(s).j * character_scale - 1.0f, (p.at(s).i + 1) * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f), 5.0f);
 	buffer.Fill_Buffer(glm::vec2((p.at(s).j + 1) * character_scale - 1.0f, (p.at(s).i + 1) * character_scale - 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f), 5.0f);
@@ -294,12 +299,12 @@ void Game::update_buffer()
 	{
 		std::cout << "Fix:" << p1.get_position().x << "," << p1.get_position().y << "\n";
 		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
-		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale_y();
 			   										  
-		buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
-		buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale_x();
+		buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale_y();
 			   										  
-		buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+		buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale_x();
 		buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
 			   										  
 		buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
@@ -468,6 +473,7 @@ void Game::clean()
 void Game::update_player_position(float amount_x, float amount_y)
 {
 	//p1.change_position(glm::vec2(amount_x, amount_y));
+	//std::cout << p1.get_scale();
 
 	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x += amount_x;
 	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y += amount_y;
@@ -482,19 +488,19 @@ void Game::update_player_position(float amount_x, float amount_y)
 
 void Game::update_player_position_x()
 {
-
+	std::cout << p1.get_scale();
 	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.x = p1.get_position().x;
-	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale();
-	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale();
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.x = p1.get_position().x + p1.get_scale_x();
+	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.x = p1.get_position().x + p1.get_scale_x();
 	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.x = p1.get_position().x;
 
 }
 
 void Game::update_player_position_y()
 {
-
-	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale();
-	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale();
+	std::cout << p1.get_scale();
+	buffer.Get_Buffer()[p1.get_buffer_index()[0]].position.y = p1.get_position().y + p1.get_scale_y();
+	buffer.Get_Buffer()[p1.get_buffer_index()[1]].position.y = p1.get_position().y + p1.get_scale_y();
 	buffer.Get_Buffer()[p1.get_buffer_index()[2]].position.y = p1.get_position().y;
 	buffer.Get_Buffer()[p1.get_buffer_index()[3]].position.y = p1.get_position().y;
 
@@ -577,13 +583,13 @@ void Game::handle_collision_new()
 	/* change the position of the player in the x-axis according to input */
 	update_player_position(p1.amount_h, 0.0f);
 	/* Here we change the position x of p1 if the there is collision */
-	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), &Is_Grounded_x, &Collides_x, X_AXIS);
+	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), tile_size, &Is_Grounded_x, &Collides_x, X_AXIS);
 	//buffer.Set_Buffer(collision_manager.Check_For_Collisions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), &Is_Grounded_x, &Collides_x, X_AXIS));
 
 	/* change the position of the player in the y-axis (i.e last quad in vertex buffer) according to input */
 	update_player_position(0.0f, p1.amount_v);
 	/* Here we change the position y of p1 if the there is collision */
-	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), &Is_Grounded_y, &Collides_y, Y_AXIS);
+	collision_manager.Check_For_Collisions(&buffer.buffer, &p1, buffer.Get_Size(), tile_size, &Is_Grounded_y, &Collides_y, Y_AXIS);
 	//buffer.Set_Buffer(collision_manager.Check_For_Collisions(buffer.Get_Buffer(), &p1, buffer.Get_Size(), &Is_Grounded_y, &Collides_y, Y_AXIS));
 }
 

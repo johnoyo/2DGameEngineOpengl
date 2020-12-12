@@ -5,9 +5,15 @@ Player::Player()
 	health = -100.0f;
 }
 
-Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, float scale) : texture_id(texture_id), position(pos), scale(scale)
+Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, float scale) : texture_id(texture_id), position(pos), scale(scale), scale_x(scale), scale_y(scale)
 {
 	std::cout << "Player: " << position.x << "," << position.y << "\n";
+	health = 100.0f;
+	set_buffer_index(index, index + 1, index + 2, index + 3);
+}
+
+Player::Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, float scale_x, float scale_y) : texture_id(texture_id), position(pos), scale_x(scale_x), scale_y(scale_y)
+{
 	health = 100.0f;
 	set_buffer_index(index, index + 1, index + 2, index + 3);
 }
@@ -111,6 +117,16 @@ float Player::get_health()
 float Player::get_scale()
 {
 	return scale;
+}
+
+float Player::get_scale_x()
+{
+	return scale_x;
+}
+
+float Player::get_scale_y()
+{
+	return scale_y;
 }
 
 unsigned int Player::get_texture_id()

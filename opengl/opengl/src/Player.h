@@ -7,6 +7,8 @@ private:
 	glm::vec2 position;
 	float health;
 	float scale;
+	float scale_x;
+	float scale_y;
 	unsigned int texture_id;
 	unsigned int buffer_index[4];
 	bool teleport = false;
@@ -19,6 +21,7 @@ public:
 	glm::vec2 custom_position_3;
 	Player();
 	Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, float scale);
+	Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, float scale_x, float scale_y);
 	Player(unsigned int texture_id, unsigned int index);
 	Player(unsigned int texture_id, unsigned int index, glm::vec2 pos);
 	Player(unsigned int texture_id, unsigned int index, glm::vec2 pos, int i, int j);
@@ -34,6 +37,8 @@ public:
 	glm::vec2 get_position();
 	float get_health();
 	float get_scale();
+	float get_scale_x();
+	float get_scale_y();
 
 	unsigned int get_texture_id();
 	void set_texture_id(unsigned int tex_id);
