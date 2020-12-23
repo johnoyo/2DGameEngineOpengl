@@ -19,6 +19,7 @@ public:
 	void Reset();
 
 	friend class Game;
+	friend class Shadow_Casting;
 
 private:
 	struct Vertex_Array* buffer = NULL;

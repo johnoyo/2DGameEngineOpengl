@@ -13,6 +13,8 @@
 #include "Texture_Manager.h"
 #include "Input_Manager.h"
 #include "Collision_Manager.h"
+#include "Shadow_Casting.h"
+#include "Window.h"
 #include <irrKlang.h>
 #include <functional>
 //#pragma comment(lib, "irrKlang.lib")
@@ -21,14 +23,18 @@
 
 class Game {
 public:
+	Window window;
 
 	Vertex_Buffer buffer;
 	Index_Buffer index_buffer;
 	Renderer2D renderer;
+	
 	Texture_Manager texture_manager;
 	Input_Manager input_manager;
-	Orthographic_Camera m_Camera;
 	Collision_Manager collision_manager;
+	
+	Orthographic_Camera m_Camera;
+	Shadow_Casting shadows;
 	irrklang::ISoundEngine* SoundEngine;
 
 	std::vector<std::vector<Player>> list;
@@ -58,21 +64,9 @@ protected:
 	bool collision = true;
 
 private:
-	GLFWwindow * window;
 
-	unsigned int vao;
-	unsigned int vb;
-	unsigned int ib;
-	unsigned int shader;
 	unsigned int level_h;
 	unsigned int level_w;
-
-	sCell* world = NULL;
-	std::vector<sEdge> vecEdges;
-	std::vector<sEdge> endingEdges;
-	std::vector<glm::vec2> edges;
-	std::vector<float> angles;
-	std::vector<first_col> duo;
 
 	unsigned int buffer_size;
 	unsigned int total_buffer_size;
@@ -80,19 +74,16 @@ private:
 	unsigned int size_without_shadows = 0;
 
 public:
-	Game(std::string& level_path, GLFWwindow *win, float width, float height, float character_scale, float refresh_rate);
+	Game(Window& window, float character_scale);
 	~Game();
+
+	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);
 	void load_level(Vertex_Array* vertex, std::string& level_path, float width, float height, float character_scale);
 	void Load_Menu(float width, float height, float text_id);
 	void Game_Over(float text_id);
 	
 	void Make_Custom_Sprite(glm::vec2 tl, glm::vec2 tr, glm::vec2 br, glm::vec2 bl, float tex_id, glm::vec4 color);
 	void Change_Sprite_Scale(Player sp, float x);
-
-	void Load_Next_Level(std::string& level_path, float width, float height, float character_scale);
-
-	void set_window(GLFWwindow *win);
-	GLFWwindow *get_window();
 
 	void Repeat_Every(double time_step, double& previous_time, std::function<void(void)> f);
 
@@ -112,19 +103,8 @@ public:
 	void update_buffer();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	void CalculateVisibilityPolygon(float ox, float oy, float radius);
-	void convert_quads_to_polygons(int sx, int sy, int w, int h, float fBlockWidth, int pitch);
-	std::pdd lineLineIntersection0(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
-	std::pdd lineLineIntersection1(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
-	bool lineLineIntersection2(std::pdd A, std::pdd B, std::pdd C, std::pdd D);
-	void Init_Shadows();
-	void Calculate_Shadows0();
-	void Calculate_Shadows1();
 	void Init_Shadow_points();
 	void Calculate_Shadow_points();
-	bool is_Edge_Connected(float x1, float y1, float x2, float y2);
-	sEdge Find_Next_Edge(sEdge e2);
-	sEdge Find_Starting_Edge(float x, float y);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 };
 

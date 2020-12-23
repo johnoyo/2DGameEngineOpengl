@@ -9,52 +9,57 @@
 #include <stdio.h>
 #include "Game.h"
 #include "Game_Instance.h"
+#include "Window.h"
 
 int main(void)
 {
 
-	/* Initialize the library */
-	if (!glfwInit())
-		return -1;
-#if 0
-	/* Create a windowed mode window and its OpenGL context */
-	GLFWwindow* window;
-	window = glfwCreateWindow(945, 540, "My VGA 2020", NULL, NULL);
-	int refresh_rate = 144;
-#else
-	
-	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//	/* Initialize the library */
+//	if (!glfwInit())
+//		return -1;
+//#if 1
+//	/* Create a windowed mode window and its OpenGL context */
+//	GLFWwindow* window;
+//	window = glfwCreateWindow(945, 540, "My VGA 2020", NULL, NULL);
+//	int refresh_rate = 144;
+//#else
+//	
+//	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//
+//	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+//	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+//	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+//	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+//
+//	int refresh_rate = mode->refreshRate;
+//	std::cout << mode->refreshRate << "\n";
+//
+//	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "My VGA 2020", glfwGetPrimaryMonitor(), NULL); 
+//
+//	
+//#endif	
+//
+//	
+//
+//	if (!window)
+//	{
+//		glfwTerminate();
+//		return -1;
+//	}
+//	/* Make the window's context current */
+//	glfwMakeContextCurrent(window);
+//	glfwSwapInterval(1);
 
-	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+	Window window = Window(945.0f, 540.0f, "Game", false);
+	//Window window = Window(945.0f, 540.0f, "Game", true);
 
-	int refresh_rate = mode->refreshRate;
-	std::cout << mode->refreshRate << "\n";
-
-	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "My VGA 2020", glfwGetPrimaryMonitor(), NULL); 
-
-	
-#endif	
-
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	window.Make_Context_Current(1);
 
 	if (glewInit() != GLEW_OK) {
 		std::cout << "Error initializing GLEW\n";
 	}
 	int size = 0;
-	std::string level = "res/levels/test1.txt";
-
-	Game_Instance game = Game_Instance(level, window, 945.0f, 540.0f, 27.0f, refresh_rate);
+	Game_Instance game = Game_Instance(window, 27.0f);
 
 	game.init();
 
@@ -66,7 +71,7 @@ int main(void)
 	int frames = 0, updates = 0;
 
 	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window))
+	while (!game.window.Window_Should_Close())
 	{
 		// - Measure time
 		nowTime = glfwGetTime();
@@ -96,14 +101,16 @@ int main(void)
 		}
 
 		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
+		game.window.Swap_Buffers();
+		//glfwSwapBuffers(window);
 
 		/* Poll for and process events */
-		glfwPollEvents();
+		game.window.Poll_For_Events();
+		//glfwPollEvents();
 	}
 
 	game.clean();
-
-	glfwTerminate();
+	game.window.Terminate();
+	//glfwTerminate();
 	return 0;
 }
